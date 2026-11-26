@@ -1,0 +1,168 @@
+{
+ "_source": "Extracted from Naguroka/chiikawa-pocket-datamine analysis/masterdata/Reward.json + ResourceItem.json (masterdata 250330.1.0): only the rewards referenced by weeding blocks/events.",
+ "rewards": [
+  {
+   "version": "250330.1.0",
+   "id": 100001,
+   "rewardType": "IdleGoldMinutes",
+   "masterId": 1,
+   "acquireAmount": "60"
+  },
+  {
+   "version": "250330.1.0",
+   "id": 120001,
+   "rewardType": "ResourceItem",
+   "masterId": 11,
+   "acquireAmount": "1"
+  },
+  {
+   "version": "250330.1.0",
+   "id": 180030,
+   "rewardType": "ResourceItem",
+   "masterId": 101,
+   "acquireAmount": "30"
+  },
+  {
+   "version": "250330.1.0",
+   "id": 180100,
+   "rewardType": "ResourceItem",
+   "masterId": 101,
+   "acquireAmount": "100"
+  },
+  {
+   "version": "250330.1.0",
+   "id": 180300,
+   "rewardType": "ResourceItem",
+   "masterId": 101,
+   "acquireAmount": "300"
+  },
+  {
+   "version": "250330.1.0",
+   "id": 181000,
+   "rewardType": "ResourceItem",
+   "masterId": 101,
+   "acquireAmount": "1000"
+  },
+  {
+   "version": "250330.1.0",
+   "id": 200001,
+   "rewardType": "ResourceItem",
+   "masterId": 301,
+   "acquireAmount": "1"
+  },
+  {
+   "version": "250330.1.0",
+   "id": 200003,
+   "rewardType": "ResourceItem",
+   "masterId": 301,
+   "acquireAmount": "3"
+  },
+  {
+   "version": "250330.1.0",
+   "id": 210001,
+   "rewardType": "ResourceItem",
+   "masterId": 302,
+   "acquireAmount": "1"
+  },
+  {
+   "version": "250330.1.0",
+   "id": 210002,
+   "rewardType": "ResourceItem",
+   "masterId": 302,
+   "acquireAmount": "2"
+  },
+  {
+   "version": "250330.1.0",
+   "id": 220001,
+   "rewardType": "ResourceItem",
+   "masterId": 303,
+   "acquireAmount": "1"
+  },
+  {
+   "version": "250330.1.0",
+   "id": 220002,
+   "rewardType": "ResourceItem",
+   "masterId": 303,
+   "acquireAmount": "2"
+  },
+  {
+   "version": "250330.1.0",
+   "id": 240001,
+   "rewardType": "ResourceItem",
+   "masterId": 501,
+   "acquireAmount": "1"
+  },
+  {
+   "version": "250330.1.0",
+   "id": 240002,
+   "rewardType": "ResourceItem",
+   "masterId": 501,
+   "acquireAmount": "2"
+  },
+  {
+   "version": "250330.1.0",
+   "id": 240003,
+   "rewardType": "ResourceItem",
+   "masterId": 501,
+   "acquireAmount": "3"
+  },
+  {
+   "version": "250330.1.0",
+   "id": 11000050,
+   "rewardType": "ResourceItem",
+   "masterId": 2,
+   "acquireAmount": "50"
+  },
+  {
+   "version": "250330.1.0",
+   "id": 11000100,
+   "rewardType": "ResourceItem",
+   "masterId": 2,
+   "acquireAmount": "100"
+  },
+  {
+   "version": "250330.1.0",
+   "id": 11000200,
+   "rewardType": "ResourceItem",
+   "masterId": 2,
+   "acquireAmount": "200"
+  }
+ ],
+ "resources": [
+  {
+   "id": 101,
+   "iconName": "resourceitem_icon_study_research",
+   "name": "whistle_candy"
+  },
+  {
+   "id": 2,
+   "iconName": "resourceitem_icon_gem",
+   "name": "gem"
+  },
+  {
+   "id": 301,
+   "iconName": "resourceitem_icon_weeding_heart",
+   "name": "heart"
+  },
+  {
+   "id": 302,
+   "iconName": "resourceitem_icon_weeding_straight",
+   "name": "sasumata"
+  },
+  {
+   "id": 303,
+   "iconName": "resourceitem_icon_weeding_range",
+   "name": "rod"
+  },
+  {
+   "id": 11,
+   "iconName": "resourceitem_icon_costume_enhance",
+   "name": "small_candy"
+  },
+  {
+   "id": 501,
+   "iconName": "gacha_ticket_rare04",
+   "name": "rare_gacha_ticket"
+  }
+ ]
+}

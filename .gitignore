@@ -1,0 +1,5 @@
+# Internal working files stay on this Mac only; the public repo ships the app, the data and the README.
+*.md
+!README.md
+docs/
+.DS_Store

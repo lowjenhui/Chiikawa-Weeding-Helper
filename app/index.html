@@ -1,0 +1,916 @@
+<title>Weed Ahead</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&family=Inter:wght@400;600&family=DM+Mono:wght@500&display=swap">
+<style>
+/* Layout: a garden plot read top-down. Sticky depth gauge, then the 6x7 board, then the soil below it. */
+:root {
+  --bg: #edf1e4;
+  --surface: #f8faf2;
+  --ink: #1f2a1c;
+  --muted: #5d6a56;
+  --line: #c8d2bb;
+  --grass-light: #bcd99d;
+  --grass-dark: #5f8c4f;
+  --grass-dark-ink: #f3f8ec;
+  --soil: #e7dcc4;
+  --candy: #d4517d;
+  --candy-soft: #f6d3df;
+  --gem: #6d4fbf;
+  --heart: #c73a52;
+  --redline: #d24a4a;
+  --route: #1d5fd1;
+  --route-ink: #fff;
+  --mode-hand: #e0609a; --mode-hand-ink: #fff; --mode-rod: #e2a400; --mode-rod-ink: #2a1f00;
+  --font-display: "M PLUS Rounded 1c", "Hiragino Maru Gothic ProN", "Arial Rounded MT Bold", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-num: "DM Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  /* 6 cells fit beside a 40px label inside the gutter, viewport border/padding and gaps */
+  --cell: min(56px, calc((100vw - 32px - 22px - 40px - 28px) / 6));
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131a11; --surface: #1b2418; --ink: #e5ecdc; --muted: #9ba891; --line: #2f3b2a;
+    --grass-light: #4e7a3d; --grass-dark: #263f20; --grass-dark-ink: #d7e6cb; --soil: #3a3327;
+    --candy: #f07ea3; --candy-soft: #4a2533; --gem: #ad91f2; --heart: #f07484; --redline: #f07070; --route: #7aa7ff; --route-ink: #0e1a2e; --mode-hand: #f58bbb; --mode-hand-ink: #2e0c1c; --mode-rod: #f5c64a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131a11; --surface: #1b2418; --ink: #e5ecdc; --muted: #9ba891; --line: #2f3b2a;
+  --grass-light: #4e7a3d; --grass-dark: #263f20; --grass-dark-ink: #d7e6cb; --soil: #3a3327;
+  --candy: #f07ea3; --candy-soft: #4a2533; --gem: #ad91f2; --heart: #f07484; --redline: #f07070; --route: #7aa7ff; --route-ink: #0e1a2e; --mode-hand: #f58bbb; --mode-hand-ink: #2e0c1c; --mode-rod: #f5c64a;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 48px;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+main { max-width: 460px; margin: 0 auto; display: grid; gap: 18px; }
+h1, h2 { font-family: var(--font-display); font-weight: 800; margin: 0; text-wrap: balance; }
+h1 { font-size: 1.35rem; letter-spacing: 0.01em; }
+h2 { font-size: 1rem; }
+.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.eyebrow { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; }
+
+/* Sticky depth gauge */
+.gauge {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: var(--bg); padding-block: 12px 10px; border-bottom: 1px solid var(--line);
+  display: grid; gap: 8px;
+}
+.gauge-top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; }
+.depth-row { display: flex; align-items: stretch; gap: 6px; }
+.depth-row label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.depth-field { flex: 1; min-width: 0; position: relative; }
+.depth-field input {
+  width: 100%; height: 48px; border-radius: 12px; border: 2px solid var(--line); background: var(--surface); color: var(--ink);
+  font-family: var(--font-num); font-size: 1.5rem; padding: 0 44px 0 14px;
+}
+.depth-field::after { content: "m"; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); font-family: var(--font-num); }
+.depth-field input:focus-visible, button:focus-visible { outline: 3px solid var(--candy); outline-offset: 2px; }
+.step {
+  width: 48px; height: 48px; border-radius: 12px; border: 2px solid var(--line); background: var(--surface); color: var(--ink);
+  font-family: var(--font-num); font-size: 1.05rem; cursor: pointer;
+}
+.step:active { transform: translateY(1px); }
+.where { font-size: 0.82rem; }
+
+/* Cycle strip */
+.strip { display: grid; grid-template-columns: repeat(20, 1fr); gap: 2px; }
+.seg { height: 14px; border-radius: 3px; background: var(--line); position: relative; }
+.seg.big { background: var(--candy-soft); }
+.seg.big::after { content: ""; position: absolute; inset: 4px 35%; border-radius: 2px; background: var(--candy); }
+.seg.here { outline: 2px solid var(--ink); outline-offset: 1px; }
+.strip-labels { display: flex; justify-content: space-between; font-size: 0.72rem; }
+
+/* Next big blocks */
+.prizes { display: grid; gap: 8px; }
+.prize {
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px;
+}
+.prize:first-child { border: 2px solid var(--candy); }
+.prize-shape { display: grid; gap: 2px; }
+.prize-shape i { display: block; width: 9px; height: 9px; border-radius: 2px; background: var(--candy); }
+.prize-main { min-width: 0; }
+.prize-main strong { font-family: var(--font-display); font-size: 1.05rem; }
+.prize-dist { text-align: right; font-size: 0.8rem; }
+.prize-dist .num { font-size: 1.15rem; display: block; color: var(--ink); }
+
+/* Board */
+.board-wrap { display: grid; gap: 6px; }
+.board { display: grid; gap: 4px; }
+.row { display: grid; grid-template-columns: 40px repeat(6, var(--cell)); gap: 4px; align-items: center; justify-content: center; }
+.rowlab { display: grid; line-height: 1.1; text-align: right; padding-right: 4px; }
+.rowlab b { font-family: var(--font-display); font-size: 0.85rem; }
+.rowlab span { font-family: var(--font-num); font-size: 0.66rem; color: var(--muted); }
+.viewport { border: 2px solid var(--line); border-radius: 16px; padding: 8px 6px; background: var(--surface); display: grid; gap: 4px; }
+.redline { display: grid; grid-template-columns: 40px 1fr; gap: 4px; align-items: center; margin-block: 2px; }
+.redline span { font-size: 0.62rem; text-align: right; color: var(--redline); padding-right: 4px; font-weight: 600; }
+.redline hr { border: 0; border-top: 3px dashed var(--redline); margin: 0; }
+.chunkbar { display: grid; grid-template-columns: 40px 1fr; gap: 4px; align-items: center; margin-block: 4px 2px; }
+.chunkbar span { grid-column: 2; font-size: 0.7rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 3px; }
+
+.cell {
+  width: var(--cell); height: var(--cell); border-radius: 9px; border: 0; padding: 2px; cursor: pointer; position: relative;
+  display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; font-size: 0.74rem; line-height: 1;
+  color: var(--ink); background: var(--grass-light);
+}
+.cell.dark {
+  background: repeating-linear-gradient(135deg, var(--grass-dark) 0 6px, color-mix(in srgb, var(--grass-dark) 82%, black) 6px 9px);
+  color: var(--grass-dark-ink);
+}
+.cell.dark::after { content: "2"; position: absolute; right: 4px; bottom: 3px; font-family: var(--font-num); font-size: 0.58rem; opacity: 0.85; }
+.cell.empty { background: var(--soil); cursor: default; }
+.cell.big { box-shadow: inset 0 0 0 3px var(--candy); }
+.cell .tag { position: absolute; left: 3px; top: 3px; font-size: 0.55rem; font-family: var(--font-num); background: var(--surface); color: var(--ink); border-radius: 4px; padding: 1px 3px; }
+.cell .amt { display: grid; gap: 1px; text-align: center; }
+.cell .amt small { font-size: 0.55rem; font-weight: 500; }
+.bare { display: grid; justify-items: center; gap: 2px; }
+.bare svg { display: block; }
+.cell .bare small { font: 800 0.62rem/1 var(--font-body); }
+.bare.wc small { color: var(--ink); }
+.bare.gem small { color: #5a3aa8; }
+.bare.tix small { color: #7a62c4; }
+.bare.gold small { color: #b85f00; }
+.bare.hrt small { color: #b81d2c; }
+.bare.sas small { color: #1d5fd1; }
+.bare.rod small { color: #8a6400; }
+.k-wc { color: var(--candy); }
+.k-gem { color: var(--gem); }
+.k-heart { color: var(--heart); }
+.cell.dark .k-wc, .cell.dark .k-gem, .cell.dark .k-heart { color: inherit; }
+.cell.cleared { background: var(--soil); color: var(--muted); }
+.cell.cleared::after { content: none; }
+.cell.cleared .amt { opacity: 0.45; text-decoration: line-through; }
+.cell.cleared::before { content: "✓"; position: absolute; right: 4px; top: 3px; font-size: 0.7rem; color: var(--muted); }
+
+/* Route planner */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; align-items: end; }
+.stats label { display: grid; gap: 2px; font-size: 0.72rem; color: var(--muted); font-weight: 600; }
+.stats input {
+  width: 100%; height: 48px; border-radius: 12px; border: 2px solid var(--line); background: var(--surface); color: var(--ink);
+  font-family: var(--font-num); font-size: 1.15rem; padding: 0 10px;
+}
+.stats.opts { grid-template-columns: 1.1fr 0.8fr 1.1fr; margin-top: 8px; }
+.stats.opts label { align-content: end; }
+.stats .box { height: 48px; border-radius: 12px; border: 2px solid var(--line); background: var(--surface); display: grid; place-items: center; }
+.stats .box input { width: 26px; height: 26px; margin: 0; accent-color: var(--route); }
+.stats input:disabled { opacity: 0.45; }
+.stats input:focus-visible { outline: 3px solid var(--candy); outline-offset: 2px; }
+.chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.chip {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 12px; padding: 6px 8px; min-height: 48px;
+  text-align: left; font: inherit; color: inherit; cursor: pointer; display: grid; gap: 1px; align-content: start;
+}
+.chip[aria-pressed="true"] { border-color: var(--route); box-shadow: 0 0 0 1px var(--route); }
+.chip b { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+.chip .rate { font-family: var(--font-num); font-weight: 500; font-size: 1.25rem; }
+.chip small { color: var(--muted); font-size: 0.72rem; }
+.chip small.warn { color: var(--heart); font-weight: 600; }
+.why { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; font-size: 0.82rem; }
+.cell.on, .cell.tool { --mode: var(--mode-hand); --mode-ink: var(--mode-hand-ink); outline: 3px solid var(--mode); outline-offset: -1px; }
+.cell.tool { outline-style: dashed; }
+.cell.m-sas { --mode: var(--route); --mode-ink: var(--route-ink); }
+.cell.m-rod { --mode: var(--mode-rod); --mode-ink: var(--mode-rod-ink); }
+/* Fade only the grass, never the reward icon. */
+.cell.faded { background-color: color-mix(in srgb, var(--grass-light) 45%, var(--bg)); }
+.cell.faded.dark { background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--grass-dark) 45%, var(--bg)) 0 6px, color-mix(in srgb, var(--grass-dark) 37%, var(--bg)) 6px 9px); }
+.badge { white-space: nowrap;
+  position: absolute; left: -4px; top: -5px; min-width: 17px; height: 17px; border-radius: 9px; padding: 0 3px; z-index: 1;
+  background: var(--mode, var(--mode-hand)); color: var(--mode-ink, var(--mode-hand-ink)); font: 700 0.62rem/17px var(--font-num); text-align: center;
+}
+/* Rod tap point: the badge sits in the middle of the centre cell, so it reads as "tap here". */
+.badge.centre { left: 50%; top: 50%; transform: translate(-50%, -50%); min-width: 26px; height: 22px; line-height: 22px; font-size: 0.72rem; border-radius: 11px; box-shadow: 0 0 0 2px var(--surface); }
+
+.summary { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 0.85rem; }
+.summary b { font-family: var(--font-num); font-weight: 500; }
+.more {
+  justify-self: center; margin-top: 8px; padding: 10px 18px; border-radius: 999px; border: 2px solid var(--line);
+  background: var(--surface); color: var(--ink); font-family: var(--font-body); font-weight: 600; cursor: pointer;
+}
+.toolbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 0.8rem; }
+.linkbtn { background: none; border: 0; color: var(--candy); font: inherit; font-weight: 600; cursor: pointer; padding: 6px 0; }
+
+details { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 10px 14px; }
+summary { cursor: pointer; font-family: var(--font-display); font-weight: 800; }
+.legend { display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; align-items: center; margin-top: 10px; font-size: 0.85rem; }
+.legend .cell { cursor: default; }
+.foot { font-size: 0.75rem; color: var(--muted); max-width: 65ch; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<main>
+  <header class="gauge">
+    <div class="gauge-top">
+      <h1>Weed Ahead</h1>
+      <span class="where muted" id="where"></span>
+    </div>
+    <div class="depth-row">
+      <button class="step" id="minus" type="button" aria-label="Depth minus 1 metre">−1</button>
+      <div class="depth-field">
+        <label for="depth">Depth on the sign, in metres</label>
+        <input id="depth" type="number" inputmode="numeric" min="0" step="1">
+      </div>
+      <button class="step" id="plus" type="button" aria-label="Depth plus 1 metre">+1</button>
+    </div>
+    <div>
+      <div class="strip" id="strip" aria-hidden="true"></div>
+      <div class="strip-labels muted"><span>Cycle start</span><span id="strip-note"></span><span>140 m</span></div>
+    </div>
+  </header>
+
+  <section class="prizes" id="prizes" aria-label="Next big blocks"></section>
+
+  <section class="board-wrap" aria-label="Route to the 2×4 block">
+    <div class="toolbar"><span class="eyebrow">Route to the 2×4 block</span></div>
+    <div class="stats">
+      <label for="stamina">Stamina<input id="stamina" type="number" inputmode="numeric" min="0" step="1"></label>
+      <label for="sas">Sasumata (L)<input id="sas" type="number" inputmode="numeric" min="0" step="1"></label>
+      <label for="rod">Rod (R)<input id="rod" type="number" inputmode="numeric" min="0" step="1"></label>
+      <label for="bonus">Candy bonus %<input id="bonus" type="number" inputmode="numeric" min="0" step="1"></label>
+    </div>
+    <div class="stats opts">
+      <label for="lastBlocks">Tools last (blocks)<input id="lastBlocks" type="number" inputmode="numeric" min="1" step="1"></label>
+      <label for="bar">Higher bar<span class="box"><input id="bar" type="checkbox"></span></label>
+      <label for="minSave">Min saved / charge<input id="minSave" type="number" inputmode="numeric" min="0" step="1"></label>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="why" id="why"></div>
+  </section>
+
+  <section class="board-wrap" aria-label="Board">
+    <div class="toolbar">
+      <span class="eyebrow">Your board now</span>
+      <span class="muted">Tap a cell to mark it cleared</span>
+    </div>
+    <div class="summary" id="summary-now"></div>
+    <div class="viewport" id="viewport"></div>
+    <div class="toolbar">
+      <span class="eyebrow">Below the board</span>
+      <button class="linkbtn" id="reset" type="button">Unmark all cells</button>
+    </div>
+    <div class="board" id="ahead"></div>
+    <button class="more" id="more" type="button">Show 35 more rows</button>
+  </section>
+
+  <details>
+    <summary>How to read the board</summary>
+    <div class="legend" id="legend"></div>
+  </details>
+
+  <p class="foot">Layouts come from decoded game data (master data 250330.1.0, fan datamine) and match live boards checked on 22 Nov 2026. 1 m on the depth sign equals one row. A big block clears with one tap for 1 stamina and pays out all its cells. Whistle Candy amounts are base values unless you enter your Candy bonus % above.</p>
+</main>
+
+<script>
+const WEED_DATA = {"version":"250330.1.0","cycle":[101,102,301,103,303,201,202,401,203,302,104,105,304,106,402,204,205,305,206,403],"chunks":{"101":[1,1,1,61,103,1,1,2,1,61,0,1,1,1,71,1,0,1,2,1,21,0,2,1,1,103,21,2,1,1,31,1,1,1,2,1,14,2,0,2,1,0],"102":[1,1,2,0,2,0,1,101,1,1,1,1,1,1,1,1,1,2,1,71,1,1,2,1,0,31,2,1,1,1,1,2,2,2,61,1,31,0,2,1,1,1],"103":[2,71,0,1,2,31,2,1,2,0,1,1,1,1,105,1,1,1,0,15,1,61,1,1,1,0,1,2,0,1,0,31,0,1,1,0,2,1,62,1,0,71],"104":[1,1,1,0,1,1,61,0,1,1,0,101,1,1,0,71,1,0,2,1,1,0,1,1,1,1,71,1,0,1,2,62,0,1,0,1,62,0,13,1,1,1],"105":[31,1,1,1,2,1,0,21,1,101,1,2,1,0,2,61,1,61,1,0,1,1,21,0,71,0,71,1,1,62,0,0,1,1,1,2,1,21,1,1,1,62],"106":[1,0,61,1,1,1,102,1,1,1,63,31,71,61,2,1,2,0,1,0,1,2,2,0,2,62,2,1,2,0,62,71,71,0,1,1,2,2,1,31,0,1],"201":[61,61,0,1,1,21,1,0,1,1,103,0,0,2,1,2,71,2,71,0,1,1,0,2,0,61,1,1,62,2,32,0,1,1,0,2,2,1,1,0,1,1],"202":[61,0,1,0,31,2,1,2,71,1,1,2,2,1,0,61,1,1,1,1,1,0,71,1,1,1,1,1,1,31,2,0,1,1,62,0,1,1,0,2,0,1],"203":[62,21,1,1,1,0,1,0,71,0,1,1,2,2,1,61,0,31,2,61,1,1,1,1,2,0,22,0,71,1,2,12,1,1,2,1,1,0,1,2,1,1],"204":[1,1,71,1,2,1,2,1,61,0,0,1,2,1,2,2,1,2,2,41,2,2,21,2,2,21,2,2,51,2,2,1,2,2,1,2,31,2,62,61,1,1],"205":[1,1,1,2,2,2,2,2,1,21,2,2,2,63,2,0,2,2,2,1,2,0,2,2,2,62,2,0,2,2,2,61,0,1,2,71,2,31,2,71,1,0],"206":[1,1,1,1,1,1,1,1,0,2,1,1,0,21,1,71,2,0,1,0,2,71,31,1,0,1,2,71,63,1,1,0,1,21,102,1,1,1,1,101,1,2],"301":[61,0,1,0,1,1,0,61,31,1,1,0,62,21,21,31,1,1,1,61,1,0,1,1,62,22,0,62,0,1,2,0,71,61,1,21,1,105,1,2,1,1],"302":[1,0,1,21,0,1,1,1,1,1,61,1,1,0,71,1,0,1,2,1,62,1,62,0,12,71,0,1,1,2,1,0,61,71,2,1,0,31,1,0,1,1],"303":[1,1,1,0,1,1,1,2,0,2,1,1,2,61,2,1,2,61,61,2,0,2,51,2,2,0,2,51,2,61,0,2,51,2,62,2,2,21,2,62,2,1],"304":[1,71,1,1,1,0,31,41,0,61,0,1,1,1,1,0,1,1,2,2,2,62,0,71,2,11,2,0,104,1,2,63,2,1,2,1,0,32,0,21,0,1],"305":[1,0,31,0,1,0,1,1,1,1,61,105,2,2,1,1,0,2,33,32,2,1,71,1,2,2,1,61,0,2,1,1,1,0,1,1,1,51,0,22,0,1],"401":[2,61,2,2,2,2,2,1,2,2,2,2,2,0,301,302,303,304,2,0,305,306,307,308,2,2,2,2,0,2,2,2,2,2,1,2,1,1,1,1,61,2],"402":[61,1,2,2,2,21,2,1,2,2,2,1,1,2,2,201,202,0,1,1,2,203,204,0,1,1,2,1,2,2,0,1,1,61,1,2,0,1,1,0,0,1],"403":[63,2,2,2,2,1,0,211,212,2,2,1,0,213,214,2,2,1,2,2,1,2,2,2,1,1,21,0,1,1,1,1,0,1,1,0,1,1,61,1,62,2]},"blocks":{"0":{"h":0,"kind":"none","amt":0,"src":"empty","big":0},"1":{"h":1,"kind":"none","amt":0,"src":"tile","big":0},"2":{"h":2,"kind":"none","amt":0,"src":"tile","big":0},"11":{"h":1,"kind":"heart","amt":3,"src":"q","big":0},"12":{"h":1,"kind":"gem","amt":50,"src":"q","big":0},"13":{"h":1,"kind":"sas","amt":2,"src":"q","big":0},"14":{"h":1,"kind":"rod","amt":2,"src":"q","big":0},"15":{"h":1,"kind":"gold","amt":60,"src":"q","big":0},"21":{"h":1,"kind":"heart","amt":1,"src":"tile","big":0},"22":{"h":1,"kind":"heart","amt":3,"src":"tile","big":0},"31":{"h":1,"kind":"gem","amt":50,"src":"tile","big":0},"32":{"h":1,"kind":"gem","amt":100,"src":"tile","big":0},"33":{"h":1,"kind":"gem","amt":200,"src":"tile","big":0},"41":{"h":1,"kind":"sas","amt":1,"src":"tile","big":0},"51":{"h":1,"kind":"rod","amt":1,"src":"tile","big":0},"61":{"h":1,"kind":"wc","amt":30,"src":"tile","big":0},"62":{"h":1,"kind":"wc","amt":100,"src":"tile","big":0},"63":{"h":1,"kind":"wc","amt":300,"src":"tile","big":0},"71":{"h":1,"kind":"sc","amt":1,"src":"tile","big":0},"101":{"h":1,"kind":"ticket","amt":1,"src":"cap","big":0},"102":{"h":1,"kind":"ticket","amt":2,"src":"cap","big":0},"103":{"h":1,"kind":"ticket","amt":3,"src":"cap","big":0},"104":{"h":1,"kind":"gem","amt":100,"src":"cap","big":0},"105":{"h":1,"kind":"gem","amt":200,"src":"cap","big":0},"201":{"h":1,"kind":"wc","amt":300,"src":"big","big":4},"202":{"h":1,"kind":"wc","amt":300,"src":"big","big":4},"203":{"h":1,"kind":"wc","amt":100,"src":"big","big":4},"204":{"h":1,"kind":"wc","amt":300,"src":"big","big":4},"211":{"h":1,"kind":"wc","amt":100,"src":"big","big":4},"212":{"h":1,"kind":"wc","amt":300,"src":"big","big":4},"213":{"h":1,"kind":"gem","amt":100,"src":"big","big":4},"214":{"h":1,"kind":"wc","amt":100,"src":"big","big":4},"221":{"h":1,"kind":"wc","amt":100,"src":"big","big":4},"222":{"h":1,"kind":"wc","amt":100,"src":"big","big":4},"223":{"h":1,"kind":"gem","amt":50,"src":"big","big":4},"224":{"h":1,"kind":"wc","amt":100,"src":"big","big":4},"301":{"h":1,"kind":"wc","amt":1000,"src":"big","big":8},"302":{"h":1,"kind":"gem","amt":100,"src":"big","big":8},"303":{"h":1,"kind":"wc","amt":1000,"src":"big","big":8},"304":{"h":1,"kind":"gem","amt":50,"src":"big","big":8},"305":{"h":1,"kind":"gem","amt":50,"src":"big","big":8},"306":{"h":1,"kind":"wc","amt":1000,"src":"big","big":8},"307":{"h":1,"kind":"heart","amt":1,"src":"big","big":8},"308":{"h":1,"kind":"wc","amt":1000,"src":"big","big":8},"311":{"h":1,"kind":"wc","amt":30,"src":"big","big":8},"312":{"h":1,"kind":"gem","amt":50,"src":"big","big":8},"313":{"h":1,"kind":"wc","amt":30,"src":"big","big":8},"314":{"h":1,"kind":"gem","amt":50,"src":"big","big":8},"315":{"h":1,"kind":"wc","amt":30,"src":"big","big":8},"316":{"h":1,"kind":"wc","amt":30,"src":"big","big":8},"317":{"h":1,"kind":"heart","amt":1,"src":"big","big":8},"318":{"h":1,"kind":"wc","amt":30,"src":"big","big":8}}};
+
+</script>
+<script>
+// Weeding board core logic. Pure functions, no DOM.
+// Runs in the browser (sets globalThis.WeedCore) and in Node (module.exports).
+// Data shape (built by app/build.mjs from weeding_masterdata/):
+//   DATA.cycle  : [chunkId x20]          the repeating chunk order
+//   DATA.chunks : {chunkId: [blockId x42]} 7 rows x 6 columns, row-major
+//   DATA.blocks : {blockId: {h, kind, amt, src, big}}
+(function (root) {
+  'use strict';
+
+  const COLS = 6;
+  const CHUNK_ROWS = 7;
+  const VIEW_ROWS = 7;
+  // Verified 25 Nov 2026: depth 25,488 m -> cycle row 37 (0 mismatches).
+  // It was 71 on 22 Nov (23,836-23,844 m): the mapping drifted 42 rows in between, cause unknown.
+  // shortcut: one fixed offset, re-calibrate from a screenshot when the board stops matching.
+  const DEPTH_OFFSET = 29;
+
+  function create(DATA) {
+    const CYCLE_ROWS = DATA.cycle.length * CHUNK_ROWS; // 140
+
+    // 0-based row index into the repeating cycle for the board row at `depth` metres.
+    function cycleRow(depth) {
+      return (((depth + DEPTH_OFFSET) % CYCLE_ROWS) + CYCLE_ROWS) % CYCLE_ROWS;
+    }
+
+    // Everything known about the board row at `depth` (1 m = 1 row).
+    function rowAt(depth) {
+      const cr = cycleRow(depth);
+      const pos = Math.floor(cr / CHUNK_ROWS);
+      const chunkRow = (cr % CHUNK_ROWS) + 1;
+      const chunkId = DATA.cycle[pos];
+      const ids = DATA.chunks[chunkId].slice((chunkRow - 1) * COLS, chunkRow * COLS);
+      return {
+        depth,
+        chunkId,
+        cyclePos: pos + 1,
+        chunkRow,
+        chunkStartDepth: depth - (chunkRow - 1),
+        cells: ids.map((id, i) => ({ id, col: i + 1, ...DATA.blocks[id] })),
+      };
+    }
+
+    // Rows from the top visible row (depth) downward.
+    function rowsFrom(depth, count) {
+      const out = [];
+      for (let k = 0; k < count; k++) out.push(rowAt(depth + k));
+      return out;
+    }
+
+    function addReward(totals, cell) {
+      if (!cell.kind || cell.kind === 'none') return;
+      totals[cell.kind] = (totals[cell.kind] || 0) + cell.amt;
+    }
+
+    // Big blocks whose top row lies within [depth, depth + horizon).
+    // A block counts once, with the sum of its cells' rewards and the
+    // depth at which its top row sits.
+    function bigBlocksAhead(depth, horizon) {
+      const groups = new Map();
+      for (let d = depth; d < depth + horizon + 2; d++) {
+        const row = rowAt(d);
+        for (const cell of row.cells) {
+          if (!cell.big) continue;
+          const variant = Math.floor(cell.id / 10); // 20,21,22 = 2x2 kinds; 30,31 = 2x4 kinds
+          const key = row.chunkStartDepth + ':' + variant;
+          let g = groups.get(key);
+          if (!g) {
+            g = { key, size: cell.big, topDepth: d, chunkId: row.chunkId, cells: [], rewards: {} };
+            groups.set(key, g);
+          }
+          g.cells.push({ depth: d, col: cell.col });
+          addReward(g.rewards, cell);
+        }
+      }
+      return [...groups.values()]
+        .filter((g) => g.topDepth < depth + horizon)
+        .sort((a, b) => a.topDepth - b.topDepth);
+    }
+
+    // Reward totals for a range of rows, skipping cells in `cleared` (Set of "depth:col").
+    // A big block costs 1 stamina in total (one tap pops it) [User, 25 Nov 2026].
+    function totalsFor(depth, count, cleared) {
+      const totals = {};
+      const blocks = new Set();
+      let stamina = 0;
+      for (const row of rowsFrom(depth, count)) {
+        for (const cell of row.cells) {
+          if (cleared && cleared.has(row.depth + ':' + cell.col)) continue;
+          if (cell.big) blocks.add(row.chunkStartDepth + ':' + Math.floor(cell.id / 10));
+          else stamina += cell.h;
+          addReward(totals, cell);
+        }
+      }
+      return { totals, stamina: stamina + blocks.size };
+    }
+
+    // Cells ("d:col") a tool clears. T = top visible row index. Cells above T and off the board are dropped;
+    // a Rod's cells below the board are kept [User]. Sasumata ignores `row`.
+    function toolCells(kind, T, row, col) {
+      const out = [];
+      const add = (d, c) => { if (d >= T && c >= 1 && c <= COLS) out.push(d + ':' + c); };
+      if (kind === 'sas') {
+        for (let d = T; d < T + VIEW_ROWS; d++) add(d, col);
+        add(T + VIEW_ROWS - 1, col - 1);
+        add(T + VIEW_ROWS - 1, col + 1);
+      } else {
+        for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) add(row + dr, col + dc);
+        add(row - 2, col); add(row + 2, col); add(row, col - 2); add(row, col + 2);
+      }
+      return out;
+    }
+
+    // Route planner. Target: the next 2x4 block. See docs/spec.md section 9.
+    // shortcut: pickup values are guesses in stamina, tune them against real play.
+    const CHARGE_VALUE = 4;        // one Sasumata/Rod charge ~ 4 stamina
+    const CANDY_PER_STAMINA = 200; // a 2x2 block is worth detouring for if candy / 200 >= its cost
+    const MIN_TOOL_SAVING = 3;     // a tool must save this much stamina to be spent
+    function planRoutes(depth, { cleared = new Set(), sas = 0, rod = 0, lastBlocks = 10, minSave = null } = {}) {
+      const target = bigBlocksAhead(depth, 280).find((g) => g.size === 8 && !g.cells.every((c) => cleared.has(c.depth + ':' + c.col)));
+      if (!target) return [];
+      const bottom = Math.max(...target.cells.map((c) => c.depth)) + 2;
+      const tkeys = target.cells.map((c) => c.depth + ':' + c.col);
+      const grid = new Map(); // "d:col" -> cell
+      const blocks = new Map(); // big-block key -> { keys, wc }
+      for (let d = depth; d <= bottom; d++) {
+        const row = rowAt(d);
+        for (const cell of row.cells) {
+          const g = { ...cell, d, k: d + ':' + cell.col };
+          if (cell.big) {
+            g.bk = row.chunkStartDepth + ':' + Math.floor(cell.id / 10);
+            if (!blocks.has(g.bk)) blocks.set(g.bk, { keys: [], wc: 0 });
+            blocks.get(g.bk).keys.push(g.k);
+            if (cell.kind === 'wc') blocks.get(g.bk).wc += cell.amt;
+          }
+          grid.set(g.k, g);
+        }
+      }
+      const nbrs = (g) => [[-1, 0], [1, 0], [0, -1], [0, 1]].map(([a, b]) => grid.get((g.d + a) + ':' + (g.col + b))).filter(Boolean);
+      const cost = (g) => (g.big ? 1 : g.h);
+
+      // Integer index per cell (row-major from depth) so the hot search runs on typed arrays, not string Maps.
+      const keys = [...grid.keys()];
+      const N = keys.length;
+      const idx = new Map(keys.map((k, i) => [k, i]));
+      const cells = keys.map((k) => grid.get(k));
+      const costA = Int32Array.from(cells, cost);
+      const emptyA = Uint8Array.from(cells, (g) => (g.src === 'empty' ? 1 : 0));
+      const rowA = Int32Array.from(cells, (g) => g.d);
+      const nb = cells.map((g) => nbrs(g).map((n) => idx.get(n.k)));
+      const INF = 1e9;
+
+      // Open ground = cleared cells + empty patches touching them or the row above R1 [H1].
+      // Dist = cheapest stamina to reach each locked cell from open ground, rows >= T only.
+      // `done` is a Set of "d:col"; `extra` lists more cleared keys (a tool being tried).
+      function solve(done, T, extra = []) {
+        const open = new Uint8Array(N);
+        const q = [];
+        const mark = (i) => { if (!open[i]) { open[i] = 1; q.push(i); } };
+        for (const k of done) mark(idx.get(k));
+        for (const k of extra) mark(idx.get(k));
+        for (let c = 0; c < COLS; c++) if (emptyA[c]) mark(c);
+        for (let h = 0; h < q.length; h++) for (const n of nb[q[h]]) if (emptyA[n]) mark(n);
+        let D = depth - 1;
+        for (const i of q) if (rowA[i] > D) D = rowA[i];
+        const dist = new Int32Array(N).fill(INF);
+        const pred = new Int32Array(N).fill(-1);
+        const todo = [];
+        for (let i = 0; i < N; i++) {
+          if (rowA[i] < T || open[i] || !(rowA[i] === depth || nb[i].some((n) => open[n]))) continue;
+          dist[i] = costA[i];
+          todo.push(i);
+        }
+        for (let h = 0; h < todo.length; h++) { // label-correcting search; weights are small ints
+          const u = todo[h];
+          for (const n of nb[u]) {
+            if (rowA[n] < T || open[n]) continue;
+            const nd = dist[u] + costA[n];
+            if (nd < dist[n]) { dist[n] = nd; pred[n] = u; todo.push(n); }
+          }
+        }
+        return { D, dist, pred };
+      }
+      const dAt = (dist, k) => { const v = dist[idx.get(k)]; return v >= INF ? Infinity : v; };
+      const best = (ks, dist) => ks.reduce((a, k) => (dAt(dist, k) < dAt(dist, a) ? k : a), ks[0]);
+
+      const pickCache = new Map();
+      // caps = { sas, rod } tool allowance before pickups (null = no tools); a tool is used only when it saves >= minSave.
+      // Charges picked up on the way raise the cap at once; a tool is never used beyond the charges held.
+      function walk(caps, minSave) {
+        const done = new Set([...cleared].filter((k) => grid.has(k)));
+        const totals = {};
+        const steps = [];
+        const saw = new Set(); // every best-placement saving met, so a sweep can skip thresholds that change nothing
+        let T = depth, spent = 0, refunded = 0, peak = 0, sasLeft = sas, rodLeft = rod, sasUsed = 0, rodUsed = 0, sasGained = 0, rodGained = 0;
+        const cv = caps ? CHARGE_VALUE : 0;
+        const value = (g) => (g.big ? 0 : g.kind === 'heart' ? g.amt : g.kind === 'sas' || g.kind === 'rod' ? cv * g.amt : 0);
+        function collect(keys) { // mark cells cleared, bank their rewards
+          const got = [];
+          for (const k of keys) {
+            const g = grid.get(k);
+            if (done.has(k) || g.src === 'empty') continue;
+            done.add(k);
+            got.push(k);
+            if (g.kind === 'none') continue;
+            totals[g.kind] = (totals[g.kind] || 0) + g.amt;
+            if (g.kind === 'heart') refunded += g.amt;
+            if (g.kind === 'sas') { sasLeft += g.amt; sasGained += g.amt; }
+            if (g.kind === 'rod') { rodLeft += g.amt; rodGained += g.amt; }
+          }
+          return got;
+        }
+        for (let guard = 0; guard < 600 && !tkeys.every((k) => done.has(k)); guard++) {
+          let s = solve(done, T);
+          if (s.D - 5 > T) { T = s.D - 5; s = solve(done, T); } // [H2] scroll
+          const now = best(tkeys, s.dist);
+          const toNow = dAt(s.dist, now);
+          if (toNow === Infinity) return null;
+          const canSas = caps && sasLeft > 0 && sasUsed < caps.sas + sasGained;
+          const canRod = caps && rodLeft > 0 && rodUsed < caps.rod + rodGained;
+          if (canSas || canRod) {
+            // The best placement does not depend on minSave, so sweep walks that reach the same state share it.
+            const ck = [T, canSas, canRod, [...done].sort().join()].join('|');
+            let pick = pickCache.get(ck);
+            if (pick === undefined) {
+              pick = null;
+              const tryTool = (kind, row, col) => {
+                const cells = toolCells(kind, T, row, col).filter((k) => grid.has(k) && !grid.get(k).big && grid.get(k).src !== 'empty' && !done.has(k));
+                if (!cells.length) return;
+                const gain = cells.reduce((a, k) => a + value(grid.get(k)), 0);
+                if (pick && cells.reduce((a, k) => a + cost(grid.get(k)), gain) <= pick.saving) return; // cannot beat the best so far
+                const after = solve(done, T, cells);
+                const saving = toNow - dAt(after.dist, best(tkeys, after.dist)) + gain;
+                if (!pick || saving > pick.saving) pick = { saving, kind, row, col, cells };
+              };
+              for (let c = 1; c <= COLS; c++) {
+                if (canSas) tryTool('sas', T, c);
+                if (canRod) for (let r = T; r < T + VIEW_ROWS; r++) tryTool('rod', r, c);
+              }
+              pickCache.set(ck, pick);
+            }
+            if (pick) saw.add(pick.saving);
+            if (pick && pick.saving >= minSave) {
+              collect(pick.cells);
+              if (pick.kind === 'sas') { sasLeft--; sasUsed++; } else { rodLeft--; rodUsed++; }
+              steps.push({ kind: pick.kind, row: pick.row, col: pick.col, cost: 0, cells: pick.cells });
+              continue;
+            }
+          }
+          // Goal: the best detour that pays for itself, else the target block.
+          let goal = now, gain = 0;
+          const consider = (k, v) => { const d = dAt(s.dist, k); if (v > d && v - d > gain) { goal = k; gain = v - d; } };
+          for (const g of grid.values()) if (g.d >= T && !g.big && !done.has(g.k)) consider(g.k, value(g));
+          for (const b of blocks.values()) if (b.keys.length === 4 && !b.keys.every((k) => done.has(k))) consider(best(b.keys, s.dist), b.wc / CANDY_PER_STAMINA);
+          let i = idx.get(goal);
+          while (s.pred[i] >= 0) i = s.pred[i];
+          const k = keys[i];
+          const g = grid.get(k);
+          spent += cost(g);
+          peak = Math.max(peak, spent - refunded);
+          const cells = collect(g.big ? blocks.get(g.bk).keys : [k]);
+          steps.push({ kind: 'hand', row: g.d, col: g.col, cost: cost(g), cells });
+        }
+        if (!tkeys.every((k) => done.has(k))) return null;
+        return {
+          steps, spent, refunded, net: spent - refunded, peak,
+          saw, sasUsed, rodUsed, sasGained, rodGained, totals, target: { topDepth: target.topDepth, size: 8, cells: target.cells },
+        };
+      }
+
+      // Routes: optional fixed bar, then the budget route (stock / lastBlocks per kind, spent where it saves most), no tools, and an over-budget route.
+      const share = (n) => Math.floor(n / Math.max(1, lastBlocks));
+      const budgetCaps = { sas: share(sas), rod: share(rod) };
+      const used = (r) => r.sasUsed + r.rodUsed;
+      let budget = null, last = null;
+      for (let m = 15; m >= MIN_TOOL_SAVING; m--) { // a high bar first, so the budget is not spent on early small savings
+        if (!last || last.saw.has(m)) last = walk(budgetCaps, m); // lowering the bar to m changes nothing unless a placement saved exactly m
+        const r = last;
+        if (r && (!budget || r.net < budget.net || (r.net === budget.net && used(r) < used(budget)))) budget = r;
+      }
+      const none = walk(null, 0);
+      const out = [];
+      if (minSave != null) { const r = walk({ sas: Infinity, rod: Infinity }, minSave); if (r) out.push({ ...r, kind: 'bar', minSave }); }
+      if (budget) out.push({ ...budget, kind: used(budget) ? 'budget' : 'none' });
+      if (none) out.push({ ...none, kind: 'none' });
+      if (minSave == null) {
+        const over = walk({ sas: Infinity, rod: Infinity }, MIN_TOOL_SAVING);
+        if (over && budget && used(over) > used(budget) && over.net < budget.net) out.push({ ...over, kind: 'over' });
+      }
+      const seen = new Set();
+      return out.map(({ saw, ...r }) => ({ ...r, sasAllow: budgetCaps.sas + r.sasGained, rodAllow: budgetCaps.rod + r.rodGained })).filter((r) => { const k = JSON.stringify(r.steps.map((s) => [s.kind, s.row, s.col])); return !seen.has(k) && seen.add(k); });
+    }
+
+    return { COLS, CHUNK_ROWS, VIEW_ROWS, CYCLE_ROWS, cycleRow, rowAt, rowsFrom, bigBlocksAhead, totalsFor, toolCells, planRoutes };
+  }
+
+  const api = { create, DEPTH_OFFSET };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else root.WeedCore = api;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+</script>
+<script>
+(function () {
+  'use strict';
+  const W = WeedCore.create(WEED_DATA);
+  const DEFAULT_DEPTH = 25488; // last reading shared on 25 Nov 2026
+  // The sign's depth belongs to R6, the row just above the dashed line [User, 25 Nov 2026].
+  // Internally a row's depth is the input at which it is R1, so its sign label is 5 less.
+  const SIGN_ROW_LAG = W.VIEW_ROWS - 2;
+  const STEP_ROWS = 35;
+
+  const store = {
+    get(key, fallback) { try { const v = localStorage.getItem(key); return v == null ? fallback : JSON.parse(v); } catch (e) { return fallback; } },
+    set(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* storage unavailable */ } },
+  };
+
+  let depth = Number(store.get('weed.depth', DEFAULT_DEPTH)) || DEFAULT_DEPTH;
+  let aheadRows = STEP_ROWS;
+  let cleared = new Set(store.get('weed.cleared', []));
+  const num = (key, fallback) => { const v = Number(store.get(key, fallback)); return Number.isFinite(v) && v >= 0 ? Math.floor(v) : fallback; };
+  let stamina = num('weed.stamina', 90);
+  let sas = num('weed.sas', 22);
+  let rod = num('weed.rod', 29);
+  let lastBlocks = Math.max(1, num('weed.lastBlocks', 10)); // the charge stock should last this many 2×4 blocks [User, 25 Nov]
+  let bar = store.get('weed.bar', false) === true; // "Higher bar" toggle: also show a route that spends a charge only when it saves >= minSave
+  let minSave = num('weed.minSave', 5);
+  let bonus = num('weed.bonus', 0); // StudyResourceAcquire %, applied as base x (1 + bonus/100) [Hypothesis]
+  const candy = (n) => Math.round(n * (1 + bonus / 100));
+  let plan = [];
+  let sel = 0;
+  let route = { num: new Map(), tool: new Set(), none: true }; // selected route, as board overlays
+
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => n.toLocaleString('en-GB');
+
+  // Reward icons (mockup variant C2): inline SVG with the value underneath.
+  const RINGS = { 30: 1, 100: 2, 300: 3 };
+  const rings = (n) => { const w = 10 + (n - 1) * 9; let c = ''; for (let i = 0; i < n; i++) c += '<circle cx="' + (7 + i * 9) + '" cy="9" r="6" fill="none" style="stroke:var(--ink)" stroke-width="2.6"/>'; return '<svg width="' + (w + 4) * 1.05 + '" height="19" viewBox="0 0 ' + (w + 4) + ' 18" aria-hidden="true">' + c + '</svg>'; };
+  const sweet = (c) => '<svg width="34" height="20" viewBox="0 0 24 14" aria-hidden="true"><path d="M1 2 L7 7 L1 12 Z M23 2 L17 7 L23 12 Z" fill="' + c + '"/><ellipse cx="12" cy="7" rx="6" ry="5.2" fill="' + c + '"/><path d="M9 4.5 Q12 7 9 9.5" stroke="rgba(255,255,255,.7)" stroke-width="1.4" fill="none"/></svg>';
+  const gem = (c) => '<svg width="24" height="20" viewBox="0 0 24 20" aria-hidden="true"><path d="M6 1 H18 L23 7 L12 19 L1 7 Z" fill="' + c + '"/><path d="M1 7 H23 M8 1 L6 7 L12 19 L18 7 L16 1" stroke="rgba(255,255,255,.55)" stroke-width="1.2" fill="none"/></svg>';
+  const ticket = (c) => '<svg width="28" height="18" viewBox="0 0 28 18" aria-hidden="true"><path d="M2 2 H26 V7 A2 2 0 0 0 26 11 V16 H2 V11 A2 2 0 0 0 2 7 Z" fill="' + c + '"/><path d="M19 3 V15" stroke="#fff" stroke-width="1.2" stroke-dasharray="2 2"/></svg>';
+  const coin = (c) => '<svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="' + c + '"/><circle cx="11" cy="11" r="6.5" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.6"/></svg>';
+  const heart = (c) => '<svg width="22" height="20" viewBox="0 0 22 20" aria-hidden="true"><path d="M11 19 C4 13 1 10 1 6 A5 5 0 0 1 11 4 A5 5 0 0 1 21 6 C21 10 18 13 11 19 Z" fill="' + c + '"/></svg>';
+  // Tool pickups show the tool's own clearing shape: Sasumata = inverted T, Rod = starburst.
+  const shape = (cells, n, c) => { const u = 24 / n; let r = '<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">'; for (const [x, y] of cells) r += '<rect x="' + (x * u + 0.6) + '" y="' + (y * u + 0.6) + '" width="' + (u - 1.2) + '" height="' + (u - 1.2) + '" rx="1" fill="' + c + '"/>'; return r + '</svg>'; };
+  const sasIco = () => shape([[1, 0], [1, 1], [1, 2], [1, 3], [0, 3], [2, 3]], 4, '#1d5fd1');
+  const rodIco = () => shape([[2, 0], [1, 1], [2, 1], [3, 1], [0, 2], [1, 2], [2, 2], [3, 2], [4, 2], [1, 3], [2, 3], [3, 3], [2, 4]], 5, '#e2a400');
+  const bare = (cls, svg, text) => '<span class="amt bare ' + cls + '">' + svg + (text == null ? '' : '<small>' + text + '</small>') + '</span>';
+
+  // kind -> [reward html, words for the aria-label]
+  const KIND_TEXT = {
+    wc: (a) => [bare('wc', rings(RINGS[a] || 1), fmt(candy(a))), 'Whistle Candy ' + candy(a)],
+    gem: (a) => [bare('gem', gem('#6d4fbf'), a), a + ' gems'],
+    heart: (a) => [bare('hrt', heart('#d62839'), '+' + a), 'Heart +' + a + ' stamina'],
+    sas: (a) => [bare('sas', sasIco(), '+' + a), 'Sasumata +' + a],
+    rod: (a) => [bare('rod', rodIco(), '+' + a), 'Rod +' + a],
+    sc: (a) => [bare('sc', sweet('#e0609a')), 'Small Candy ×' + a],
+    ticket: (a) => [bare('tix', ticket('#b9a2ee'), '×' + a), a + ' rare gacha ticket' + (a > 1 ? 's' : '')],
+    gold: (a) => [bare('gold', coin('#ef8a17'), a / 60 + 'h'), a / 60 + ' hour of Subjugation Coins'],
+  };
+
+  function totalsText(t) {
+    const parts = [];
+    if (t.wc) parts.push('◎ <b>' + fmt(candy(t.wc)) + '</b> candy');
+    if (t.gem) parts.push('◆ <b>' + fmt(t.gem) + '</b> gems');
+    if (t.heart) parts.push('♥ <b>' + t.heart + '</b> stamina');
+    if (t.sas) parts.push('L <b>+' + t.sas + '</b>');
+    if (t.rod) parts.push('R <b>+' + t.rod + '</b>');
+    return parts;
+  }
+
+  // Big blocks in the visible window: show the block total once, on its top-left cell.
+  function bigLabels(fromDepth, rows) {
+    const labels = new Map();
+    for (const g of W.bigBlocksAhead(fromDepth - 1, rows + 2)) {
+      const first = g.cells.reduce((a, b) => (a.depth < b.depth || (a.depth === b.depth && a.col < b.col) ? a : b));
+      labels.set(first.depth + ':' + first.col, g);
+    }
+    return labels;
+  }
+
+  function cellButton(row, cell, labels, blocks) {
+    const key = row.depth + ':' + cell.col;
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'cell';
+    let desc;
+    if (cell.src === 'empty') { b.classList.add('empty'); b.disabled = true; desc = 'empty'; }
+    else desc = cell.h === 2 ? 'dark grass, 2 stamina' : 'light grass, 1 stamina';
+    if (cell.h === 2) b.classList.add('dark');
+
+    let inner = '';
+    if (cell.src === 'big') {
+      b.classList.add('big');
+      const g = labels.get(key);
+      if (g) {
+        const total = candy(g.rewards.wc || 0);
+        inner = '<span class="tag">' + (g.size === 8 ? '2×4' : '2×2') + '</span><span class="amt k-wc">◎' + fmt(total) + '</span>';
+      }
+      desc += ', part of a ' + (cell.big === 8 ? '2 by 4' : '2 by 2') + ' big block';
+    } else if (cell.kind !== 'none') {
+      const [html, words] = KIND_TEXT[cell.kind](cell.amt);
+      inner = html;
+      desc += ', ' + (cell.src === 'q' ? 'Question Mark: ' : cell.src === 'cap' ? 'capsule: ' : '') + words;
+    }
+    b.innerHTML = inner;
+
+    if (!route.none && (cell.src !== 'empty' || route.num.has(key))) { // a Sasumata badge can sit on empty soil
+      const n = route.num.get(key);
+      const tk = route.tool.get(key);
+      if (tk) b.classList.add('tool', 'm-' + tk);
+      if (n) {
+        b.classList.remove('tool', 'm-sas', 'm-rod');
+        b.classList.add('on', 'm-' + n.kind);
+        b.insertAdjacentHTML('afterbegin', '<span class="badge' + (n.kind === 'rod' ? ' centre' : '') + '">' + n.label + '</span>');
+        desc += ', route step ' + n.label + (n.kind === 'rod' ? ', Rod centre' : '');
+      }
+      if (!n && !route.tool.has(key) && cell.src !== 'big') b.classList.add('faded');
+    }
+    if (cleared.has(key)) { b.classList.add('cleared'); desc += ', marked cleared'; }
+    b.setAttribute('aria-label', 'Row at ' + fmt(row.depth - SIGN_ROW_LAG) + ' metres, column ' + cell.col + ': ' + desc);
+    if (cell.src !== 'empty') {
+      b.setAttribute('aria-pressed', cleared.has(key) ? 'true' : 'false');
+      b.addEventListener('click', () => {
+        // One tap pops a whole big block, so mark/unmark all its cells [User].
+        const grp = cell.src === 'big' && blocks.get(row.chunkStartDepth + ':' + Math.floor(cell.id / 10));
+        const keys = grp ? grp.cells.map((c) => c.depth + ':' + c.col) : [key];
+        if (keys.every((k) => cleared.has(k))) keys.forEach((k) => cleared.delete(k)); else keys.forEach((k) => cleared.add(k));
+        saveCleared();
+        render();
+      });
+    }
+    return b;
+  }
+
+  function rowEl(row, label, labels, blocks) {
+    const r = document.createElement('div');
+    r.className = 'row';
+    const lab = document.createElement('div');
+    lab.className = 'rowlab';
+    lab.innerHTML = '<b>' + label + '</b><span>' + fmt(row.depth - SIGN_ROW_LAG) + '</span>';
+    r.appendChild(lab);
+    for (const cell of row.cells) r.appendChild(cellButton(row, cell, labels, blocks));
+    return r;
+  }
+
+  function chunkBar(row) {
+    const d = document.createElement('div');
+    d.className = 'chunkbar';
+    const cont = row.chunkRow === 1 ? '' : ' (continued)';
+    d.innerHTML = '<span>Chunk ' + row.chunkId + cont + ' · cycle ' + row.cyclePos + ' of 20</span>';
+    return d;
+  }
+
+  function renderStrip() {
+    const top = W.rowAt(depth);
+    const bigPos = new Set(WEED_DATA.cycle.map((id, i) => [id, i]).filter(([id]) => WEED_DATA.chunks[id].some((b) => WEED_DATA.blocks[b].big)).map(([, i]) => i + 1));
+    const strip = $('strip');
+    strip.innerHTML = '';
+    for (let p = 1; p <= 20; p++) {
+      const s = document.createElement('div');
+      s.className = 'seg' + (bigPos.has(p) ? ' big' : '') + (p === top.cyclePos ? ' here' : '');
+      strip.appendChild(s);
+    }
+    $('strip-note').textContent = 'You: ' + top.cyclePos + ' of 20';
+    $('where').innerHTML = 'Chunk <span class="num">' + top.chunkId + '</span>, row ' + top.chunkRow;
+  }
+
+  function renderPrizes() {
+    const list = W.bigBlocksAhead(depth, 280).slice(0, 3);
+    const box = $('prizes');
+    box.innerHTML = '';
+    for (const g of list) {
+      const rowsBelow = g.topDepth - SIGN_ROW_LAG - depth; // metres from the dashed line (R6)
+      const onScreen = g.topDepth - (W.VIEW_ROWS - 1);
+      const el = document.createElement('article');
+      el.className = 'prize';
+      const w = g.size === 8 ? 4 : 2;
+      el.innerHTML =
+        '<div class="prize-shape" style="grid-template-columns:repeat(' + w + ',9px)">' + '<i></i>'.repeat(g.size) + '</div>' +
+        '<div class="prize-main"><strong class="k-wc">◎ ' + fmt(candy(g.rewards.wc || 0)) + '</strong> ' +
+        '<span class="muted">' + (g.size === 8 ? '2×4' : '2×2') + ' block' + (g.rewards.gem ? ' + ' + g.rewards.gem + ' gems' : '') + (g.rewards.heart ? ' + ♥' + g.rewards.heart : '') + '</span>' +
+        '<div class="muted" style="font-size:0.78rem">Top row at <span class="num">' + fmt(g.topDepth - SIGN_ROW_LAG) + '</span> m · enters R7 at <span class="num">' + fmt(onScreen) + '</span> m</div></div>' +
+        '<div class="prize-dist">' + (rowsBelow <= 1 ? '<span class="num">Here</span>on screen' : '<span class="num">' + rowsBelow + ' m</span>to go') + '</div>';
+      box.appendChild(el);
+    }
+  }
+
+  // Rows drawn below the board: the user's setting, but at least down to the target block's bottom row + 2.
+  function belowRows() {
+    const need = plan.length ? Math.max(...plan[0].target.cells.map((c) => c.depth)) + 2 - (depth + W.VIEW_ROWS) + 1 : 0;
+    return Math.max(aheadRows, need);
+  }
+
+  function renderBoard() {
+    const blocks = new Map(W.bigBlocksAhead(depth - 1, W.VIEW_ROWS + belowRows() + 2).map((g) => [g.key, g]));
+    const labels = bigLabels(depth, W.VIEW_ROWS + belowRows());
+    const vp = $('viewport');
+    vp.innerHTML = '';
+    const rows = W.rowsFrom(depth, W.VIEW_ROWS);
+    rows.forEach((row, k) => {
+      if (k > 0 && row.chunkRow === 1) vp.appendChild(chunkBar(row));
+      vp.appendChild(rowEl(row, 'R' + (k + 1), labels, blocks));
+      if (k === 5) {
+        const line = document.createElement('div');
+        line.className = 'redline';
+        line.innerHTML = '<span>dashed line</span><hr>';
+        vp.appendChild(line);
+      }
+    });
+
+    const now = W.totalsFor(depth, W.VIEW_ROWS, cleared);
+    $('summary-now').innerHTML = totalsText(now.totals).map((p) => '<span>' + p + '</span>').join('') +
+      '<span class="muted">Clearing every uncleared cell costs <b>' + now.stamina + '</b> stamina</span>';
+
+    const ahead = $('ahead');
+    ahead.innerHTML = '';
+    W.rowsFrom(depth + W.VIEW_ROWS, belowRows()).forEach((row, k) => {
+      if (row.chunkRow === 1 || k === 0) ahead.appendChild(chunkBar(row));
+      ahead.appendChild(rowEl(row, '+' + (row.depth - depth - W.VIEW_ROWS + 1), labels, blocks));
+    });
+  }
+
+  let planning = false;
+  function renderRoute() {
+    const chips = $('chips');
+    chips.innerHTML = '';
+    const r = plan[sel];
+    route = { num: new Map(), tool: new Map(), none: !r };
+    if (!r) { $('why').textContent = planning ? 'Planning routes…' : 'No 2×4 block within 280 m.'; return; }
+    const base = plan.find((p) => p.kind === 'budget');
+    const baseUsed = base ? base.sasUsed + base.rodUsed : 0;
+    plan.forEach((p, i) => {
+      const used = p.sasUsed + p.rodUsed;
+      const title = { budget: 'Within budget', none: 'No tools', over: 'Over budget', bar: 'Saves ≥' + p.minSave + ' each' }[p.kind];
+      const use = p.kind === 'none' ? 'no charges' : 'L ' + p.sasUsed + ' of ' + p.sasAllow + ' · R ' + p.rodUsed + ' of ' + p.rodAllow;
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.setAttribute('aria-pressed', i === sel ? 'true' : 'false');
+      b.innerHTML = '<b>' + title + '</b><span class="rate">' + p.net + '</span>' +
+        '<small>net stamina</small><small>' + use + '</small>' +
+        (p.kind === 'over' ? '<small class="warn">uses ' + (used - baseUsed) + ' more than budget</small>' : '') +
+        (p.peak > stamina ? '<small class="warn">needs ' + p.peak + ', you have ' + stamina + '</small>' : '');
+      b.addEventListener('click', () => { sel = i; renderRoute(); renderBoard(); });
+      chips.appendChild(b);
+    });
+    r.steps.forEach((st, i) => {
+      route.num.set(st.row + ':' + st.col, { kind: st.kind, label: st.kind === 'hand' ? String(i + 1) : (i + 1) + ' ' + (st.kind === 'sas' ? 'L' : 'R') });
+      if (st.kind !== 'hand') st.cells.forEach((k) => route.tool.set(k, st.kind));
+    });
+    const hand = r.steps.filter((s) => s.kind === 'hand').length;
+    const tools = [r.sasUsed && 'Sasumata ×' + r.sasUsed, r.rodUsed && 'Rod ×' + r.rodUsed].filter(Boolean).join(' and ') || 'no tools';
+    const picks = [r.totals.heart > 1 && '♥ +' + (r.totals.heart - 1), r.sasGained + r.rodGained && '+' + (r.sasGained + r.rodGained) + ' charges',
+      (n => n && n + ' 2×2 block' + (n > 1 ? 's' : ''))(r.steps.filter((s) => s.kind === 'hand' && s.cells.length === 4).length)].filter(Boolean);
+    $('why').innerHTML = hand + ' tap' + (hand === 1 ? '' : 's') + ' by hand, ' + tools + (picks.length ? ', picking up ' + picks.join(', ') : '') +
+      '. Budget this leg: L ' + r.sasAllow + ', R ' + r.rodAllow + ' (stock ÷ ' + lastBlocks + ' blocks + pickups). The 2×4 block tops out at <b class="num">' + fmt(r.target.topDepth - SIGN_ROW_LAG) + '</b> m; the route collects ◎ <b>' + fmt(candy(r.totals.wc || 0)) + '</b> candy.';
+  }
+
+  function renderLegend() {
+    const items = [
+      ['cell', '', 'Light grass. 1 stamina. Rewards only ever sit under light grass.'],
+      ['cell dark', '', 'Dark grass. 2 stamina. Never hides a reward.'],
+      ['cell empty', '', 'Empty ground. Nothing to clear.'],
+      ['cell', bare('wc', rings(3), '300'), 'Whistle Candy. 1, 2 or 3 rings = 30, 100 or 300 base; the number includes your Candy bonus.'],
+      ['cell', bare('sc', sweet('#e0609a')), 'Small Candy.'],
+      ['cell', bare('gem', gem('#6d4fbf'), '50'), 'Gems.'],
+      ['cell', bare('hrt', heart('#d62839'), '+1'), 'Heart. Restores stamina when cleared.'],
+      ['cell', bare('gold', coin('#ef8a17'), '1h'), 'Subjugation Coins, in hours of idle gold.'],
+      ['cell', bare('sas', sasIco(), '+2'), 'Sasumata pickup: the blue inverted T is its clearing shape. +N charges.'],
+      ['cell', bare('rod', rodIco(), '+1'), 'Rod pickup: the yellow starburst is its clearing shape. +N charges.'],
+      ['cell', bare('tix', ticket('#b9a2ee'), '×3'), 'Rare gacha tickets. Question Marks and capsules show only their fixed reward.'],
+      ['cell big', '<span class="tag">2×4</span><span class="amt k-wc">◎4,000</span>', 'Big block. Shows the block total on its top-left cell. One tap pops all of it.'],
+      ['cell on', '<span class="badge">3</span>', 'Route step, pink: clear by hand (Heart mode). Tap in number order.'],
+      ['cell on m-sas', '<span class="badge">2 L</span>', 'Blue: use Sasumata on this column (badge on its top row).'],
+      ['cell on m-rod', '<span class="badge centre">5 R</span>', 'Yellow: use Rod, tapping this cell. It is the centre of the Rod area.'],
+      ['cell tool m-rod', '', 'Dashed outline: cleared by that tool step (blue Sasumata, yellow Rod).'],
+      ['cell cleared', bare('wc', rings(1), '30'), 'Marked cleared by you. Tapping a big block marks all its cells.'],
+    ];
+    $('legend').innerHTML = items.map(([c, inner, text]) => '<span class="' + c + '" aria-hidden="true">' + inner + '</span><span>' + text + '</span>').join('');
+  }
+
+  function saveCleared() {
+    // Keep only marks at or below the current top row; rows above have scrolled away.
+    cleared = new Set([...cleared].filter((k) => Number(k.split(':')[0]) >= depth));
+    store.set('weed.cleared', [...cleared]);
+  }
+
+  function setDepth(d) {
+    if (!Number.isFinite(d) || d < 0) return;
+    depth = Math.round(d);
+    $('depth').value = depth;
+    store.set('weed.depth', depth);
+    saveCleared();
+    render();
+  }
+
+  // Draw the board at once, then plan: a far target can take up to ~1 s on a phone.
+  let planTick = 0;
+  function render() {
+    plan = [];
+    sel = 0;
+    planning = true;
+    renderStrip(); renderPrizes(); renderRoute(); renderBoard();
+    const tick = ++planTick;
+    setTimeout(() => {
+      if (tick !== planTick) return; // a newer input superseded this plan
+      plan = W.planRoutes(depth, { cleared, sas, rod, lastBlocks, minSave: bar ? minSave : null });
+      planning = false;
+      renderRoute(); renderBoard();
+    }, 30);
+  }
+
+  $('depth').value = depth;
+  $('depth').addEventListener('change', (e) => setDepth(Number(e.target.value)));
+  $('depth').addEventListener('keydown', (e) => { if (e.key === 'Enter') setDepth(Number(e.target.value)); });
+  const fields = { stamina, sas, rod, bonus, lastBlocks, minSave };
+  const setters = { stamina: (v) => { stamina = v; }, sas: (v) => { sas = v; }, rod: (v) => { rod = v; }, bonus: (v) => { bonus = v; }, lastBlocks: (v) => { lastBlocks = v; }, minSave: (v) => { minSave = v; } };
+  for (const id of Object.keys(fields)) {
+    const el = $(id);
+    const min = id === 'lastBlocks' ? 1 : 0;
+    el.value = fields[id];
+    el.addEventListener('change', () => {
+      const v = Math.floor(Number(el.value));
+      if (!Number.isFinite(v) || v < min) { el.value = fields[id]; return; }
+      setters[id](v); fields[id] = v; store.set('weed.' + id, v); render();
+    });
+  }
+  $('bar').checked = bar;
+  $('minSave').disabled = !bar;
+  $('bar').addEventListener('change', (e) => { bar = e.target.checked; $('minSave').disabled = !bar; store.set('weed.bar', bar); render(); });
+  $('minus').addEventListener('click', () => setDepth(depth - 1));
+  $('plus').addEventListener('click', () => setDepth(depth + 1));
+  $('more').addEventListener('click', () => { aheadRows += STEP_ROWS; renderBoard(); });
+  $('reset').addEventListener('click', () => { cleared.clear(); saveCleared(); render(); });
+  renderLegend();
+  render();
+})();
+</script>
