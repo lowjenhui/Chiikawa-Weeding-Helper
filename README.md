@@ -18,7 +18,7 @@ The route planner is new and still being checked against real play, so take its 
 ## How it works: the 20-board cycle
 
 - Each weeding board is a fixed layout of 6 columns × 7 rows. The game calls these layouts "chunks".
-- After the tutorial boards, the game repeats the same 20 chunks in the same order, forever. 20 chunks × 7 rows makes one **140 m cycle**.
+- After the tutorial boards, the game repeats the same 20 chunks in the same order. 20 chunks × 7 rows makes one **140 m cycle**. The game actually loops over a list of 143 chunks (7 cycles plus 3 extra chunks), so every 1,001 m the pattern slips by 21 m. The helper allows for this.
 - 1 m on the depth sign is 1 row. So once you know your depth, the helper knows where you are in the cycle and can show every cell below you: its grass, rewards, hearts, tool pickups and big blocks.
 - Each cycle has one big **2×4 block** (the biggest Whistle Candy payout) plus a few 2×2 blocks. The planner aims for the next 2×4 block.
 

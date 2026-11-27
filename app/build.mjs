@@ -53,7 +53,7 @@ for (let i = 0; i < normal.length; i++) {
 }
 const usedChunks = Object.fromEntries(cycle.map((id) => [id, chunks[id]]));
 
-const data = { version: '250330.1.0', cycle, chunks: usedChunks, blocks };
+const data = { version: '250330.1.0', cycle, loop: normal.length, chunks: usedChunks, blocks };
 const dataJs = 'const WEED_DATA = ' + JSON.stringify(data) + ';\n';
 writeFileSync(join(here, 'data.js'), dataJs);
 

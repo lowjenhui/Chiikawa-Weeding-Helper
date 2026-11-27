@@ -10,17 +10,20 @@
   const COLS = 6;
   const CHUNK_ROWS = 7;
   const VIEW_ROWS = 7;
-  // Verified 25 Nov 2026: depth 25,488 m -> cycle row 37 (0 mismatches).
-  // It was 71 on 22 Nov (23,836-23,844 m): the mapping drifted 42 rows in between, cause unknown.
-  // shortcut: one fixed offset, re-calibrate from a screenshot when the board stops matching.
-  const DEPTH_OFFSET = 29;
+  // Depth d is row d + ROW_SHIFT of the run. After the 20 tutorial chunks (140 rows) the game loops
+  // over all 143 Normal chunks (7 cycles of 20, then 3 more), so every 1,001-row loop slips the
+  // 20-cycle by 21 rows. Fits every check: 23,836-23,844 m (22 Nov), 25,488 m (25 Nov), 26,219 m (27 Nov).
+  // shortcut: ROW_SHIFT 134 fits too; the next loop start (27,173 m for -6, 27,033 m for 134) tells them apart.
+  const ROW_SHIFT = -6;
 
   function create(DATA) {
     const CYCLE_ROWS = DATA.cycle.length * CHUNK_ROWS; // 140
+    const LOOP_ROWS = DATA.loop * CHUNK_ROWS; // 1,001
 
     // 0-based row index into the repeating cycle for the board row at `depth` metres.
     function cycleRow(depth) {
-      return (((depth + DEPTH_OFFSET) % CYCLE_ROWS) + CYCLE_ROWS) % CYCLE_ROWS;
+      const r = (depth + ROW_SHIFT - CYCLE_ROWS) % LOOP_ROWS; // row within the current 143-chunk loop
+      return ((r % CYCLE_ROWS) + CYCLE_ROWS) % CYCLE_ROWS;
     }
 
     // Everything known about the board row at `depth` (1 m = 1 row).
@@ -293,7 +296,7 @@
     return { COLS, CHUNK_ROWS, VIEW_ROWS, CYCLE_ROWS, cycleRow, rowAt, rowsFrom, bigBlocksAhead, totalsFor, toolCells, planRoutes };
   }
 
-  const api = { create, DEPTH_OFFSET };
+  const api = { create };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.WeedCore = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

@@ -23,9 +23,6 @@ function cls(c) {
   if (c.kind === 'sc') return 'SC';
   return c.h === 2 ? 'D' : 'l';
 }
-// The 22 Nov screenshots were taken under the old offset (71). Shifting their depth by
-// OLD_SHIFT keeps them as checks on the layouts under the current offset (29).
-const OLD_SHIFT = 42;
 function check(depth, obs) {
   const rows = W.rowsFrom(depth, 7);
   obs.trim().split('\n').forEach((line, k) => {
@@ -40,16 +37,16 @@ test('depth maps to the verified cycle rows', () => {
   assert.equal(W.cycleRow(25488), 37);
   assert.equal(W.rowAt(25488).chunkId, 201);
   assert.equal(W.rowAt(25488).chunkRow, 3);
-  assert.equal(W.cycleRow(23836 + OLD_SHIFT), 107);
-  assert.equal(W.cycleRow(23843 + OLD_SHIFT), 114);
-  assert.equal(W.cycleRow(23844 + OLD_SHIFT), 115);
-  const r = W.rowAt(23836 + OLD_SHIFT);
+  assert.equal(W.cycleRow(23836), 107);
+  assert.equal(W.cycleRow(23843), 114);
+  assert.equal(W.cycleRow(23844), 115);
+  const r = W.rowAt(23836);
   assert.equal(r.chunkId, 204);
   assert.equal(r.chunkRow, 3);
   assert.equal(r.cyclePos, 16);
 });
 
-test('screenshot at 23,836 m matches', () => check(23836 + OLD_SHIFT, `
+test('screenshot at 23,836 m matches', () => check(23836, `
 D l D D . D
 D S D D . D
 D h D D . D
@@ -58,7 +55,7 @@ G D . . . l
 l l . D D D
 D D l h D D`));
 
-test('screenshot at 23,843 m matches (? = locked empty)', () => check(23843 + OLD_SHIFT, `
+test('screenshot at 23,843 m matches (? = locked empty)', () => check(23843, `
 D w3 D . D D
 D l D . D D
 D w2 D . D D
@@ -67,7 +64,7 @@ D G D . l ?
 l ? G . l ?
 l l l l w1 Cap`));
 
-test('screenshot at 23,844 m matches after Sasumata', () => check(23844 + OLD_SHIFT, `
+test('screenshot at 23,844 m matches after Sasumata', () => check(23844, `
 D . D . D D
 D . D . D D
 D . . . D SC
@@ -86,13 +83,20 @@ D . l ? l l
 w1 . l ? G D
 l D SC l l D`));
 
+test('2x4 block after 26,172 m shows up 21 m later (143-chunk loop) [User, 27 Nov]', () => {
+  const eight = W.bigBlocksAhead(26100, 280).find((b) => b.size === 8);
+  // User saw it at 26,219 instead of the predicted 26,198, both read 1 m below the card's "Top row at"
+  // (26,197 before the fix), so the card should now say 26,218.
+  assert.equal(eight.topDepth - (W.VIEW_ROWS - 2), 26218);
+});
+
 test('next big blocks from the 23,844 m board', () => {
-  const bb = W.bigBlocksAhead(23844 + OLD_SHIFT, 140);
+  const bb = W.bigBlocksAhead(23844, 140);
   assert.equal(bb[0].size, 4);
-  assert.equal(bb[0].topDepth, 23863 + OLD_SHIFT);
+  assert.equal(bb[0].topDepth, 23863);
   assert.deepEqual(bb[0].rewards, { wc: 500, gem: 100 });
   const eight = bb.find((b) => b.size === 8);
-  assert.equal(eight.topDepth, 23920 + OLD_SHIFT); // chunk 401 (cycle pos 8), rows 3-4 -> cycle row 51
+  assert.equal(eight.topDepth, 23920); // chunk 401 (cycle pos 8), rows 3-4 -> cycle row 51
   assert.deepEqual(eight.rewards, { wc: 4000, gem: 200, heart: 1 });
   assert.equal(eight.cells.length, 8);
 });
