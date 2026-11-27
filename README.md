@@ -27,19 +27,19 @@ The route planner is new and still being checked against real play, so take its 
 **1. Enter your depth.** Read the depth on the sign in the game (in metres) and type it into the top box. The sign's depth belongs to the row just above the dashed red line. Use **−1 / +1** as you clear rows.
 
 - The strip under the depth shows where you are in the 20-chunk cycle ("You: 6 of 20"). Pink segments are chunks with big blocks.
-- The cards below it list the next big blocks, what they pay, and how many metres away they are. **Tap a card to plan a route to that block.** The chosen card shows "✓ Route target" and a blue border. A popped or passed block drops back to the next 2×4.
+- Below it is your route target: the next 2×4 block by default, with what it pays and how many metres away it is. To aim somewhere else, tap **Other targets** and pick another block. A popped or passed block drops back to the next 2×4.
 
-**2. Check the board matches.** "Your board now" should look like your screen in the game. If it doesn't, nudge the depth by ±1 until it does. Open **How to read the board** at the bottom for what each icon and colour means.
+**2. Check the board matches.** "Your board now" should look like your screen in the game. If it doesn't, nudge the depth by ±1 until it does. Tap the **?** next to "Your board now" for what each icon and colour means.
 
 **3. Enter your resources.** Under "Route to the ... block" (the heading names your chosen target), one line sums up your inputs. Tap **Edit** to open them; they start folded so the route and board stay near the top. Boxes marked * are required.
 
 | Box | What to enter |
 |---|---|
 | Stamina | Your current weeding stamina. It only powers the "needs X, you have Y" warning. |
-| **L** Sas. * | Sasumata charges you hold. |
+| **L** Sasumata * | Sasumata charges you hold. |
 | **R** Rod * | Subjugation Rod charges you hold. |
-| Study % | Your Whistle Candy bonus from Study, if any. It only changes the candy amounts shown. Not sure of the number? Open **Work out my Study bonus from my ranks** and tap the last level you've reached on your study graph. |
-| Share my tools across the next ___ 2×4 blocks (default 10) | Charges don't refill, so the planner spends about your stock ÷ this number per trip to a block (2×2 targets too), plus any charges you pick up on the way. Lower it to spend tools more freely. Open **How tools are shared** to see the numbers worked out. |
+| Study bonus % | Your Whistle Candy bonus from Study, if any. It only changes the candy amounts shown. Not sure of the number? Tap its **?** and tap the last level you've reached on your study graph. |
+| Share my tools across the next ___ 2×4 blocks (default 10) | Charges don't refill, so the planner spends about your stock ÷ this number per trip to a block (2×2 targets too), plus any charges you pick up on the way. Lower it to spend tools more freely. Tap its **?** to see the numbers worked out. |
 | Also show a route that only uses a tool when it saves at least ___ stamina | Tick this to add a route that only uses a charge when it saves at least this much stamina. |
 
 The blue **L** and yellow **R** chips match the badges on the board and the route cards.
@@ -51,7 +51,7 @@ The blue **L** and yellow **R** chips match the badges on the board and the rout
 - **Over budget**: cheaper in stamina but uses more charges than your share. It's only shown when it actually helps.
 - **Big savings only**: the route from the "Also show a route..." option, with its "≥ N stamina per tool" bar.
 
-Each card shows **net stamina** (stamina spent minus hearts collected) and how many charges it uses. Tap a card to draw it on the board.
+Each card shows **net stamina** (stamina spent minus hearts collected) and how many charges it uses. Tap a card to draw it on the board. "How this route works" underneath says how many taps and tools the chosen route uses, and what it collects.
 
 **5. Follow the steps.** On the board, the numbered cells are the route, in order:
 

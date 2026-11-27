@@ -107,6 +107,10 @@ h2 { font-size: 1rem; }
 .prize-main strong { font-family: var(--font-display); font-size: 1.05rem; }
 .prize-dist { text-align: right; font-size: 0.8rem; }
 .prize-dist .num { font-size: 1.15rem; display: block; color: var(--ink); }
+.others {
+  display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; min-height: 44px; padding: 10px 2px;
+  background: none; border: 0; border-top: 1px dashed var(--line); color: var(--route); font: 600 0.85rem var(--font-body); text-align: left; cursor: pointer;
+}
 
 /* Board */
 .board-wrap { display: grid; gap: 6px; }
@@ -158,22 +162,19 @@ h2 { font-size: 1rem; }
 .cell.cleared::before { content: "✓"; position: absolute; right: 4px; top: 3px; font-size: 0.7rem; color: var(--muted); }
 
 /* Route planner */
-.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; align-items: end; }
-.stats label { display: grid; gap: 2px; font-size: 0.72rem; color: var(--muted); font-weight: 600; }
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: end; }
+.flab { display: flex; align-items: center; }
+.stats label, .stats .fld { display: grid; gap: 2px; font-size: 0.72rem; color: var(--muted); font-weight: 600; }
 .stats input, .row2 input[type=number] {
   width: 100%; height: 48px; border-radius: 12px; border: 2px solid var(--line); background: var(--surface); color: var(--ink);
-  font-family: var(--font-num); font-size: 1.15rem; padding: 0 10px;
+  font-family: var(--font-num); font-size: 1.15rem; padding: 0 10px; position: relative; /* sits above the "?" hit areas */
 }
 .req { color: var(--heart); font-weight: 800; }
-#inputs { display: grid; gap: 8px; }
+/* details content ignores grid gap in some browsers, so groups are spaced with margins */
+#inputs > .stats { margin-top: 12px; }
+#inputs > .row2, #inputs > .reqnote { margin-top: 16px; margin-bottom: 0; }
 #inputs > summary { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 44px; font-size: 0.85rem; }
 #inputs > summary .edit { color: var(--muted); font-weight: 600; white-space: nowrap; }
-#inputs[open] > summary { margin-bottom: 8px; }
-#inputs details { padding: 6px 12px; }
-#inputs details > summary { min-height: 36px; display: flex; align-items: center; font-size: 0.8rem; }
-#inputs details > summary::before { content: "▸"; margin-right: 6px; color: var(--muted); }
-#inputs details[open] > summary::before { content: "▾"; }
-.ladder p { margin: 6px 0; font-size: 0.8rem; color: var(--muted); }
 .rank { margin-top: 8px; }
 .rank.dim { opacity: 0.55; }
 .rank-head { display: flex; justify-content: space-between; font: 700 0.8rem var(--font-display); }
@@ -181,15 +182,13 @@ h2 { font-size: 1rem; }
 .rank-boxes button { height: 30px; min-width: 0; padding: 0; border-radius: 6px; border: 2px solid var(--line); background: var(--surface); cursor: pointer; }
 .rank-boxes button.on { background: var(--candy); border-color: var(--candy); }
 .rank-boxes button.last { box-shadow: 0 0 0 2px var(--ink); }
-.ladder-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font: 700 0.85rem var(--font-display); }
 .reqnote { margin: 0; font-size: 0.72rem; color: var(--muted); }
-.row2 { display: grid; gap: 8px; margin-top: 8px; }
+.row2 { display: grid; gap: 16px; }
 .spread, .inline { display: grid; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 600; color: var(--ink); }
 .spread { grid-template-columns: 1fr 64px; }
 .inline { grid-template-columns: auto 1fr 64px; }
 .spread input, .inline input[type=number] { height: 48px; padding: 0 8px; font-size: 1rem; }
 .inline input[type=checkbox] { width: 24px; height: 24px; margin: 0; accent-color: var(--route); }
-.help { font-size: 0.8rem; color: var(--muted); background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; margin: 8px 0 0; }
 .tchip { display: inline-block; font: 800 0.62rem/16px var(--font-body); padding: 0 5px; border-radius: 8px; margin-right: 3px; vertical-align: 1px; }
 .tchip.l { background: var(--route); color: var(--route-ink); }
 .tchip.r { background: var(--mode-rod); color: var(--mode-rod-ink); }
@@ -205,7 +204,11 @@ h2 { font-size: 1rem; }
 .chip .rate { font-family: var(--font-num); font-weight: 500; font-size: 1.25rem; }
 .chip small { color: var(--muted); font-size: 0.72rem; }
 .chip small.warn { color: var(--heart); font-weight: 600; }
-.why { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; font-size: 0.82rem; }
+.why { border-left: 3px solid var(--route); padding: 2px 0 2px 12px; display: grid; gap: 4px; font-size: 0.84rem; }
+.why .h { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 700; }
+.why ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 3px; }
+.why li { display: flex; gap: 8px; align-items: baseline; }
+.why .ic { width: 18px; text-align: center; flex: none; }
 .cell.on, .cell.tool { --mode: var(--mode-hand); --mode-ink: var(--mode-hand-ink); outline: 3px solid var(--mode); outline-offset: -1px; }
 .cell.tool { outline-style: dashed; }
 .cell.m-sas { --mode: var(--route); --mode-ink: var(--route-ink); }
@@ -231,6 +234,31 @@ h2 { font-size: 1rem; }
 
 details { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 10px 14px; }
 summary { cursor: pointer; font-family: var(--font-display); font-weight: 800; }
+.qs {
+  position: relative; width: 22px; height: 22px; margin-left: 6px; padding: 0; border-radius: 50%; border: 2px solid var(--route); background: none; color: var(--route);
+  display: inline-grid; place-items: center; font: 800 0.7rem var(--font-body); cursor: pointer; vertical-align: middle;
+}
+.qs::after { content: ""; position: absolute; inset: -11px; }
+#helpsheet {
+  margin: auto 0 0; width: 100%; max-width: none; max-height: 50vh; padding: 0; border: 0; border-radius: 18px 18px 0 0; overflow: auto;
+  background: var(--surface); color: var(--ink); box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.2);
+}
+#helpsheet.tall { max-height: 75vh; }
+#helpsheet::backdrop { background: rgba(0, 0, 0, 0.4); }
+.sheet-in { padding: 10px 16px 16px; display: grid; gap: 8px; }
+.grab { width: 40px; height: 4px; border-radius: 2px; background: var(--line); justify-self: center; }
+.sheet-head { display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: var(--surface); z-index: 1; }
+#help-close { width: 44px; height: 44px; margin-right: -12px; border: 0; background: none; color: var(--ink); font-size: 1.1rem; cursor: pointer; }
+#help-body { display: grid; gap: 8px; }
+#help-body p { margin: 0; font-size: 0.85rem; }
+.livetot { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; background: var(--bg); border-radius: 10px; padding: 8px 10px; font-size: 0.85rem; }
+.livetot b { font: 500 1.3rem var(--font-num); color: var(--candy); }
+.livetot.tools b { font-size: 1.1rem; color: var(--ink); }
+@media (min-width: 800px) {
+  #helpsheet, #helpsheet.tall { margin: 0 0 0 auto; height: 100%; max-height: none; width: 360px; border-radius: 0; border-left: 1px solid var(--line); box-shadow: -8px 0 24px rgba(0, 0, 0, 0.13); }
+  #helpsheet::backdrop { background: transparent; }
+  .grab { display: none; }
+}
 .legend { display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; align-items: center; margin-top: 10px; font-size: 0.85rem; }
 .legend .cell { cursor: default; }
 .foot { font-size: 0.75rem; color: var(--muted); max-width: 65ch; }
@@ -264,25 +292,15 @@ summary { cursor: pointer; font-family: var(--font-display); font-weight: 800; }
     <details id="inputs">
       <summary><span id="inputs-sum"></span><span class="edit">Edit ▾</span></summary>
       <div class="stats">
-        <label for="stamina">Stamina<input id="stamina" type="number" inputmode="numeric" min="0" step="1"></label>
-        <label for="sas"><span><span class="tchip l">L</span>Sas.<span class="req">*</span></span><input id="sas" type="number" inputmode="numeric" min="0" step="1"></label>
+        <label for="sas"><span><span class="tchip l">L</span>Sasumata<span class="req">*</span></span><input id="sas" type="number" inputmode="numeric" min="0" step="1"></label>
         <label for="rod"><span><span class="tchip r">R</span>Rod<span class="req">*</span></span><input id="rod" type="number" inputmode="numeric" min="0" step="1"></label>
-        <label for="bonus">Study %<input id="bonus" type="number" inputmode="numeric" min="0" step="1"></label>
+        <label for="stamina">Stamina<input id="stamina" type="number" inputmode="numeric" min="0" step="1"></label>
+        <div class="fld"><span class="flab"><label for="bonus">Study bonus %</label><button class="qs" type="button" data-help="study" aria-label="Help: Study bonus">?</button></span><input id="bonus" type="number" inputmode="numeric" min="0" step="1"></div>
       </div>
-      <details class="ladder">
-        <summary>Work out my Study bonus from my ranks</summary>
-        <p>Tap the last level you've reached on your study graph. Each rank needs the one before it, so the earlier ones fill in too.</p>
-        <div id="ranks"></div>
-        <div class="ladder-foot"><span id="ladder-total"></span><button class="linkbtn" id="ladder-clear" type="button">Clear</button></div>
-      </details>
       <div class="row2">
-        <label class="spread" for="lastBlocks"><span>Share my tools across the next ___ 2×4 blocks (default 10)</span><input id="lastBlocks" type="number" inputmode="numeric" min="1" step="1"></label>
+        <div class="spread"><span><label for="lastBlocks">Share my tools across the next ___ 2×4 blocks (default 10)</label><button class="qs" type="button" data-help="share" aria-label="Help: Tool sharing">?</button></span><input id="lastBlocks" type="number" inputmode="numeric" min="1" step="1"></div>
         <label class="inline" for="bar"><input id="bar" type="checkbox"><span>Also show a route that only uses a tool when it saves at least ___ stamina</span><input id="minSave" type="number" inputmode="numeric" min="0" step="1" aria-label="Minimum stamina saved per tool"></label>
       </div>
-      <details>
-        <summary>How tools are shared</summary>
-        <p class="help" id="help"></p>
-      </details>
       <p class="reqnote"><span class="req">*</span> required</p>
     </details>
     <div class="chips" id="chips"></div>
@@ -291,7 +309,7 @@ summary { cursor: pointer; font-family: var(--font-display); font-weight: 800; }
 
   <section class="board-wrap" aria-label="Board">
     <div class="toolbar">
-      <span class="eyebrow">Your board now</span>
+      <span class="eyebrow">Your board now<button class="qs" type="button" data-help="board" aria-label="Help: How to read the board">?</button></span>
       <span class="muted">Tap a cell to mark it cleared</span>
     </div>
     <div class="summary" id="summary-now"></div>
@@ -304,13 +322,16 @@ summary { cursor: pointer; font-family: var(--font-display); font-weight: 800; }
     <button class="more" id="more" type="button">Show 35 more rows</button>
   </section>
 
-  <details>
-    <summary>How to read the board</summary>
-    <div class="legend" id="legend"></div>
-  </details>
-
   <p class="foot">Layouts come from decoded game data (master data 250330.1.0, fan datamine) and match live boards checked on 22 Nov 2026. 1 m on the depth sign equals one row. A big block clears with one tap for 1 stamina and pays out all its cells. Whistle Candy amounts are base values unless you enter your Study % above.</p>
 </main>
+
+<dialog id="helpsheet" aria-labelledby="help-title">
+  <div class="sheet-in">
+    <span class="grab" aria-hidden="true"></span>
+    <div class="sheet-head"><h2 id="help-title"></h2><button type="button" id="help-close" aria-label="Close">✕</button></div>
+    <div id="help-body"></div>
+  </div>
+</dialog>
 
 <script>
 /*@@DATA@@*/
@@ -499,40 +520,80 @@ summary { cursor: pointer; font-family: var(--font-display); font-weight: 800; }
     return { list, target: list.find((g) => g.topDepth === targetTop) || dflt };
   }
 
+  let othersOpen = false; // memory only; starts closed
+  function prizeCard(g, target) {
+    const rowsBelow = g.topDepth - SIGN_ROW_LAG - depth; // metres from the dashed line (R6)
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'prize';
+    el.setAttribute('aria-pressed', g === target ? 'true' : 'false');
+    const w = g.size === 8 ? 4 : 2;
+    el.innerHTML =
+      '<div class="prize-shape" style="grid-template-columns:repeat(' + w + ',9px)">' + '<i></i>'.repeat(g.size) + '</div>' +
+      '<div class="prize-main"><strong class="k-wc">◎ ' + fmt(candy(g.rewards.wc || 0)) + '</strong> ' +
+      '<span class="muted">' + sizeName(g) + ' block' + (g.rewards.gem ? ' + ' + g.rewards.gem + ' gems' : '') + (g.rewards.heart ? ' + ♥' + g.rewards.heart : '') + '</span>' +
+      '<div class="muted" style="font-size:0.78rem">Top row <span class="num">' + fmt(g.topDepth - SIGN_ROW_LAG) + '</span> m' + (g === target ? ' · <span class="target" style="display:inline">✓ Route target</span>' : '') + '</div></div>' +
+      '<div class="prize-dist">' + (rowsBelow <= 1 ? '<span class="num">Here</span>on screen' : '<span class="num">' + rowsBelow + ' m</span>to go') + '</div>';
+    el.addEventListener('click', () => { targetTop = g.topDepth; othersOpen = false; store.set('weed.target', targetTop); render(); });
+    return el;
+  }
+
   function renderPrizes() {
     const { list, target } = blockCards();
     $('route-title').textContent = target ? 'Route to the ' + fmt(candy(target.rewards.wc || 0)) + ' ' + sizeName(target) + ' block' : 'Route to a big block';
     const box = $('prizes');
     box.innerHTML = '';
-    for (const g of list) {
-      const rowsBelow = g.topDepth - SIGN_ROW_LAG - depth; // metres from the dashed line (R6)
-      const el = document.createElement('button');
-      el.type = 'button';
-      el.className = 'prize';
-      el.setAttribute('aria-pressed', g === target ? 'true' : 'false');
-      const w = g.size === 8 ? 4 : 2;
-      el.innerHTML =
-        '<div class="prize-shape" style="grid-template-columns:repeat(' + w + ',9px)">' + '<i></i>'.repeat(g.size) + '</div>' +
-        '<div class="prize-main"><strong class="k-wc">◎ ' + fmt(candy(g.rewards.wc || 0)) + '</strong> ' +
-        '<span class="muted">' + sizeName(g) + ' block' + (g.rewards.gem ? ' + ' + g.rewards.gem + ' gems' : '') + (g.rewards.heart ? ' + ♥' + g.rewards.heart : '') + '</span>' +
-        '<div class="muted" style="font-size:0.78rem">Top row <span class="num">' + fmt(g.topDepth - SIGN_ROW_LAG) + '</span> m' + (g === target ? ' · <span class="target" style="display:inline">✓ Route target</span>' : '') + '</div></div>' +
-        '<div class="prize-dist">' + (rowsBelow <= 1 ? '<span class="num">Here</span>on screen' : '<span class="num">' + rowsBelow + ' m</span>to go') + '</div>';
-      el.addEventListener('click', () => { targetTop = g.topDepth; store.set('weed.target', targetTop); render(); });
-      box.appendChild(el);
-    }
+    if (target) box.appendChild(prizeCard(target, target));
+    const others = list.filter((g) => g !== target);
+    if (!others.length) return;
+    const n2 = others.filter((g) => g.size !== 8).length;
+    const counts = [n2 && '2×2 blocks (' + n2 + ')', others.length - n2 && '2×4 blocks (' + (others.length - n2) + ')'].filter(Boolean).join(', ');
+    const tog = document.createElement('button');
+    tog.type = 'button';
+    tog.className = 'others';
+    tog.setAttribute('aria-expanded', othersOpen ? 'true' : 'false');
+    tog.innerHTML = '<span>Other targets · ' + counts + '</span><span aria-hidden="true">' + (othersOpen ? '▴' : '▾') + '</span>';
+    tog.addEventListener('click', () => { othersOpen = !othersOpen; renderPrizes(); });
+    box.appendChild(tog);
+    if (othersOpen) for (const g of others) box.appendChild(prizeCard(g, target));
   }
 
+  // One native <dialog> serves the three "?" buttons; render() refreshes it while it is open.
+  let helpKind = null; // 'board' | 'study' | 'share'
+  let helpOpener = null;
+  const HELP_TITLE = { board: 'How to read the board', study: 'Study bonus', share: 'How tool sharing works' };
   function renderHelp() {
-    $('help').innerHTML = 'Tools never come back, so the planner rations them. Each trip to a block may use your tools ÷ the number of blocks above (' +
-      sas + ' ' + tc('l') + ' and ' + rod + ' ' + tc('r') + ' over ' + lastBlocks + ' blocks = ' + Math.floor(sas / lastBlocks) + ' ' + tc('l') + ' and ' + Math.floor(rod / lastBlocks) + ' ' + tc('r') +
-      '), plus any tools it picks up on the way. Tick the box to compare a route that saves tools for big savings only.';
+    if (!helpKind) return;
+    const dlg = $('helpsheet'), body = $('help-body'), top = dlg.scrollTop;
+    const focused = body.contains(document.activeElement) ? document.activeElement.getAttribute('aria-label') : null;
+    $('help-title').textContent = HELP_TITLE[helpKind];
+    dlg.classList.toggle('tall', helpKind === 'study');
+    body.innerHTML = '';
+    if (helpKind === 'board') body.innerHTML = '<div class="legend">' + renderLegend() + '</div>';
+    else if (helpKind === 'study') body.appendChild(studyBody());
+    else body.innerHTML = '<p>Tools never come back, so the planner rations them.</p>' +
+      '<div class="livetot tools"><span>Each trip to a block may use</span><span><b>' + Math.floor(sas / lastBlocks) + '</b> ' + tc('l') + ' <b>' + Math.floor(rod / lastBlocks) + '</b> ' + tc('r') + '</span></div>' +
+      '<p>That\'s your ' + sas + ' L and ' + rod + ' R shared over the next ' + lastBlocks + ' 2×4 blocks, plus any tools the route picks up on the way. Lower the number to spend tools faster; raise it to make them last.</p>';
+    dlg.scrollTop = top;
+    if (focused) body.querySelector('[aria-label="' + focused + '"]')?.focus(); // keep keyboard place after a ladder tap rebuilds the buttons
   }
+  function openHelp(kind, opener) { helpKind = kind; helpOpener = opener; renderHelp(); $('helpsheet').showModal(); }
 
   function renderInputs() {
     $('inputs-sum').innerHTML = stamina + ' stamina · ' + tc('l') + sas + ' · ' + tc('r') + rod + ' · +' + fmt(bonus) + '% study · shared over ' + lastBlocks + ' blocks';
+  }
+
+  function studyBody() {
+    const el = document.createElement('div');
+    el.style.display = 'grid';
+    el.style.gap = '8px';
+    el.innerHTML = '<div class="livetot"><span>Your total</span><b>+' + fmt(bonus) + '%</b></div>' +
+      '<p class="muted">Tap the last level you\'ve reached on your study graph. Each rank needs the one before it, so earlier ones fill in too. Your total is saved as you tap.</p><div></div>' +
+      '<div><button class="linkbtn" type="button">Clear</button></div>';
+    el.lastChild.firstChild.addEventListener('click', () => setBonus(0));
+    const ranks = el.children[2];
     const pos = WeedCore.studyPosition(bonus);
     const filled = pos && bonus > 0 ? pos : { rank: -1, level: 0 };
-    $('ranks').innerHTML = '';
     WeedCore.STUDY_RANKS.forEach((r, i) => {
       const done = filled.rank > i ? r.levels : filled.rank === i ? filled.level : 0;
       const row = document.createElement('div');
@@ -543,13 +604,13 @@ summary { cursor: pointer; font-family: var(--font-display); font-weight: 800; }
         const b = document.createElement('button');
         b.type = 'button';
         b.className = (k <= done ? 'on' : '') + (i === filled.rank && k === done ? ' last' : '');
-        b.setAttribute('aria-label', r.label + ' rank, level ' + k + ' of ' + r.levels);
+        b.setAttribute('aria-label', 'Rank ' + (i + 1) + ' (' + r.label + '), level ' + k + ' of ' + r.levels); // rank number keeps the two +1a% ranks distinct
         b.addEventListener('click', () => setBonus(i === filled.rank && k === done ? WeedCore.studyBonus(i, k - 1) : WeedCore.studyBonus(i, k)));
         boxes.appendChild(b);
       }
-      $('ranks').appendChild(row);
+      ranks.appendChild(row);
     });
-    $('ladder-total').textContent = 'Total +' + fmt(bonus) + '%';
+    return el;
   }
 
   // Rows drawn below the board: the user's setting, but at least down to the target block's bottom row + 2.
@@ -618,18 +679,18 @@ summary { cursor: pointer; font-family: var(--font-display); font-weight: 800; }
       if (st.kind !== 'hand') st.cells.forEach((k) => route.tool.set(k, st.kind));
     });
     const hand = r.steps.filter((s) => s.kind === 'hand').length;
-    const tools = [r.sasUsed && 'Sasumata ×' + r.sasUsed, r.rodUsed && 'Rod ×' + r.rodUsed].filter(Boolean).join(' and ') || 'no tools';
-    const picks = [r.totals.heart > 1 && '♥ +' + (r.totals.heart - 1), r.sasGained + r.rodGained && '+' + (r.sasGained + r.rodGained) + ' charges',
-      (n => n && n + ' 2×2 block' + (n > 1 ? 's' : ''))(r.steps.slice(0, -1).filter((s) => s.kind === 'hand' && s.cells.length === 4).length)].filter(Boolean);
-    $('why').innerHTML = hand + ' tap' + (hand === 1 ? '' : 's') + ' by hand, ' + tools + (picks.length ? ', picking up ' + picks.join(', ') : '') +
-      '. Budget this leg: L ' + r.sasAllow + ', R ' + r.rodAllow + ' (stock ÷ ' + lastBlocks + ' blocks + pickups). The ' + sizeName(r.target) + ' block tops out at <b class="num">' + fmt(r.target.topDepth - SIGN_ROW_LAG) + '</b> m; the route collects ◎ <b>' + fmt(candy(r.totals.wc || 0)) + '</b> candy.';
+    const used = [hand && hand + ' tap' + (hand === 1 ? '' : 's') + ' by hand', r.sasUsed && tc('l') + 'Sasumata ×' + r.sasUsed, r.rodUsed && tc('r') + 'Rod ×' + r.rodUsed].filter(Boolean);
+    const steps = used.length > 1 ? used.slice(0, -1).join(', ') + ' and ' + used[used.length - 1] + ' (order is numbered on the board)' : used[0];
+    $('why').innerHTML = '<span class="h">How this route works</span><ul>' +
+      '<li><span class="ic">✋</span><span>' + steps + '</span></li>' +
+      '<li><span class="ic">◎</span><span>Reaches the block at <b>' + fmt(r.target.topDepth - SIGN_ROW_LAG) + ' m</b> and collects <b>' + fmt(candy(r.totals.wc || 0)) + '</b> candy</span></li></ul>';
   }
 
-  function renderLegend() {
+  function renderLegend() { // returns the legend rows for the board help sheet
     const items = [
       ['cell', '', 'Light grass. 1 stamina. Rewards only ever sit under light grass.'],
       ['cell dark', '', 'Dark grass. 2 stamina. Never hides a reward.'],
-      ['cell empty', '', 'Empty ground. Nothing to clear.'],
+      ['cell empty', '', 'Empty soil: free to walk.'],
       ['cell', bare('wc', rings(3), '300'), 'Whistle Candy. 1, 2 or 3 rings = 30, 100 or 300 base; the number includes your Study %.'],
       ['cell', bare('sc', sweet('#e0609a')), 'Small Candy.'],
       ['cell', bare('gem', gem('#6d4fbf'), '50'), 'Gems.'],
@@ -645,7 +706,7 @@ summary { cursor: pointer; font-family: var(--font-display); font-weight: 800; }
       ['cell tool m-rod', '', 'Dashed outline: cleared by that tool step (blue Sasumata, yellow Rod).'],
       ['cell cleared', bare('wc', rings(1), '30'), 'Marked cleared by you. Tapping a big block marks all its cells.'],
     ];
-    $('legend').innerHTML = items.map(([c, inner, text]) => '<span class="' + c + '" aria-hidden="true">' + inner + '</span><span>' + text + '</span>').join('');
+    return items.map(([c, inner, text]) => '<span class="' + c + '" aria-hidden="true">' + inner + '</span><span>' + text + '</span>').join('');
   }
 
   function saveCleared() {
@@ -695,7 +756,10 @@ summary { cursor: pointer; font-family: var(--font-display); font-weight: 800; }
     });
   }
   function setBonus(v) { bonus = v; fields.bonus = v; $('bonus').value = v; store.set('weed.bonus', v); render(); }
-  $('ladder-clear').addEventListener('click', () => setBonus(0));
+  document.querySelectorAll('[data-help]').forEach((b) => b.addEventListener('click', () => openHelp(b.dataset.help, b)));
+  $('help-close').addEventListener('click', () => $('helpsheet').close());
+  $('helpsheet').addEventListener('click', (e) => { if (e.target === e.currentTarget) e.currentTarget.close(); }); // backdrop
+  $('helpsheet').addEventListener('close', () => { helpKind = null; if (helpOpener) helpOpener.focus(); });
   $('bar').checked = bar;
   $('minSave').disabled = !bar;
   $('bar').addEventListener('change', (e) => { bar = e.target.checked; $('minSave').disabled = !bar; store.set('weed.bar', bar); render(); });
@@ -703,7 +767,6 @@ summary { cursor: pointer; font-family: var(--font-display); font-weight: 800; }
   $('plus').addEventListener('click', () => setDepth(depth + 1));
   $('more').addEventListener('click', () => { aheadRows += STEP_ROWS; renderBoard(); });
   $('reset').addEventListener('click', () => { cleared.clear(); saveCleared(); render(); });
-  renderLegend();
   render();
 })();
 </script>
