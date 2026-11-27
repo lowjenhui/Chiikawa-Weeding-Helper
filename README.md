@@ -9,18 +9,30 @@ It runs in your browser (phone or desktop), with nothing to install or sign in t
 Weeding boards in Chiikawa Pocket aren't random. They come from a fixed cycle of 20 layouts, so the depth on the sign tells you every cell below you. Weed Ahead uses that to show you the board ahead of time, so you can test a plan before you commit stamina and tool charges:
 
 - **See what's coming.** Enter the depth from the sign to see your current board, the rows below it, and where the next big Whistle Candy blocks are.
-- **Compare routes.** Enter your stamina, Sasumata and Subjugation Rod charges. Tap a block card to choose where to route to (the next 2×4 by default). The helper draws up to three routes to it: within budget, with no tools, and over budget. It shows what each one costs.
+- **Compare routes.** Enter your stamina, Sasumata and Subjugation Rod charges. It routes to the next 2×4 block by default; tap **Other targets** to pick another. The helper draws up to three routes to it: within budget, with no tools, and over budget. It shows what each one costs.
 - **Try "what if".** Change your tool budget, Study bonus or the big-savings option, and see how the routes change. That way you can choose to save charges or spend them.
 - **Track your board.** Tap cells to mark them cleared as you play. Your marks are saved on your own device.
 
 The route planner is new and still being checked against real play, so take its routes as suggestions.
+
+## Screenshots
+
+<p>
+  <img src="app/screenshots/phone-main.jpg" width="250" alt="Phone view: depth 25,488 m, the 4,000-candy 2×4 block as route target 9 m away, two route cards (within budget, no tools) and 'How this route works'">
+  <img src="app/screenshots/phone-route.jpg" width="250" alt="The route drawn on the board: numbered Rod and hand steps leading down to the 2×4 block labelled 4,000">
+  <img src="app/screenshots/phone-study-sheet.jpg" width="250" alt="The Study bonus help sheet: tap the last rank level reached; total +2,000%">
+</p>
+
+<img src="app/screenshots/desktop-help-panel.jpg" width="760" alt="Desktop view with the 'How to read the board' panel docked on the right beside the board">
+
+Left to right: the main view on a phone, the route drawn on the board, and the Study bonus helper. Below: desktop, with the board legend open beside the board.
 
 ## How it works: the 20-board cycle
 
 - Each weeding board is a fixed layout of 6 columns × 7 rows. The game calls these layouts "chunks".
 - After the tutorial boards, the game repeats the same 20 chunks in the same order. 20 chunks × 7 rows makes one **140 m cycle**. The game actually loops over a list of 143 chunks (7 cycles plus 3 extra chunks), so every 1,001 m the pattern slips by 21 m. The helper allows for this.
 - 1 m on the depth sign is 1 row. So once you know your depth, the helper knows where you are in the cycle and can show every cell below you: its grass, rewards, hearts, tool pickups and big blocks.
-- Each cycle has one big **2×4 block** (the biggest Whistle Candy payout) plus a few 2×2 blocks. The planner aims for the next 2×4 block unless you tap another card.
+- Each cycle has one big **2×4 block** (the biggest Whistle Candy payout) plus a few 2×2 blocks. The planner aims for the next 2×4 block unless you pick another under **Other targets**.
 
 ## How to use it
 

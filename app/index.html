@@ -251,6 +251,7 @@ summary { cursor: pointer; font-family: var(--font-display); font-weight: 800; }
 #help-close { width: 44px; height: 44px; margin-right: -12px; border: 0; background: none; color: var(--ink); font-size: 1.1rem; cursor: pointer; }
 #help-body { display: grid; gap: 8px; }
 #help-body p { margin: 0; font-size: 0.85rem; }
+.help-sub { margin: 6px 0 0; padding-top: 10px; border-top: 1px solid var(--line); font-family: var(--font-display); font-size: 0.9rem; }
 .livetot { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; background: var(--bg); border-radius: 10px; padding: 8px 10px; font-size: 0.85rem; }
 .livetot b { font: 500 1.3rem var(--font-num); color: var(--candy); }
 .livetot.tools b { font-size: 1.1rem; color: var(--ink); }
@@ -888,7 +889,12 @@ const WEED_DATA = {"version":"250330.1.0","cycle":[101,102,301,103,303,201,202,4
     else if (helpKind === 'study') body.appendChild(studyBody());
     else body.innerHTML = '<p>Tools never come back, so the planner rations them.</p>' +
       '<div class="livetot tools"><span>Each trip to a block may use</span><span><b>' + Math.floor(sas / lastBlocks) + '</b> ' + tc('l') + ' <b>' + Math.floor(rod / lastBlocks) + '</b> ' + tc('r') + '</span></div>' +
-      '<p>That\'s your ' + sas + ' L and ' + rod + ' R shared over the next ' + lastBlocks + ' 2×4 blocks, plus any tools the route picks up on the way. Lower the number to spend tools faster; raise it to make them last.</p>';
+      '<p>That\'s your ' + sas + ' L and ' + rod + ' R shared over the next ' + lastBlocks + ' 2×4 blocks, plus any tools the route picks up on the way. Lower the number to spend tools faster; raise it to make them last.</p>' +
+      // From a planner run over every 2×4-to-2×4 leg in one 1,001 m loop (27 Nov 2026); see docs/spec.md.
+      '<h3 class="help-sub">How much to spend</h3>' +
+      '<p><b>Always spend what you pick up</b>, about 11 charges per cycle (4 ' + tc('l') + ' Sasumata, 7 ' + tc('r') + ' Rod). That saves about 31 stamina per cycle and never runs your stock down.</p>' +
+      '<p>There\'s no "best" amount beyond that. Each extra charge from your stock saves about 3 stamina, whether it\'s the 1st or the 16th. So the right number is simply how long you want your stock to last: your stock ÷ the cycles you plan to play, plus your pickups. That\'s what this setting does.</p>' +
+      '<p class="muted" style="font-size:0.75rem">Estimated from the planner over one full loop of the board, assuming each cycle starts untouched.</p>';
     dlg.scrollTop = top;
     if (focused) body.querySelector('[aria-label="' + focused + '"]')?.focus(); // keep keyboard place after a ladder tap rebuilds the buttons
   }
