@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { create } = require('./core.js');
+const { create, studyBonus, studyPosition } = require('./core.js');
 const src = readFileSync(new URL('./data.js', import.meta.url), 'utf8');
 const DATA = new Function(src + '; return WEED_DATA;')();
 const W = create(DATA);
@@ -188,4 +188,38 @@ test('a popped 2x4 stops being the route target', () => {
   const cleared = new Set(first.cells.map((c) => c.depth + ':' + c.col));
   const next = W.planRoutes(25488, { sas: 22, rod: 29, cleared })[0].target;
   assert.equal(next.topDepth, 25502 + 140);
+});
+
+test('targetTop picks a 2x2 block as the route target and pops it last', () => {
+  const T = W.bigBlocksAhead(25488, 280).find((g) => g.size === 4).topDepth;
+  assert.equal(T, 25551);
+  const routes = W.planRoutes(25488, { sas: 22, rod: 29, targetTop: T });
+  assert.ok(routes.length > 0);
+  for (const r of routes) {
+    const last = r.steps[r.steps.length - 1];
+    assert.equal(r.target.size, 4);
+    assert.equal(r.target.topDepth, T);
+    assert.equal(last.kind, 'hand');
+    assert.equal(last.cells.length, 4);
+  }
+});
+
+test('targetTop on a fully cleared or unknown block falls back to the next 2x4', () => {
+  const first = W.planRoutes(25488, { sas: 22, rod: 29 })[0].target;
+  const cleared = new Set(first.cells.map((c) => c.depth + ':' + c.col));
+  const r = W.planRoutes(25488, { sas: 22, rod: 29, cleared, targetTop: first.topDepth })[0];
+  assert.equal(r.target.topDepth, first.topDepth + 140);
+  assert.equal(W.planRoutes(25488, { sas: 22, rod: 29, targetTop: 1 })[0].target.topDepth, first.topDepth);
+});
+
+test('study ladder totals and positions', () => {
+  assert.equal(studyBonus(3, 1), 2000);
+  assert.equal(studyBonus(1, 7), 310);
+  assert.equal(studyBonus(0, 0), 0);
+  assert.equal(studyBonus(5, 1), 4500);
+  assert.deepEqual(studyPosition(4500), { rank: 5, level: 1 });
+  assert.deepEqual(studyPosition(2000), { rank: 3, level: 1 });
+  assert.deepEqual(studyPosition(310), { rank: 1, level: 7 });
+  assert.deepEqual(studyPosition(0), { rank: 0, level: 0 });
+  assert.equal(studyPosition(2001), null);
 });

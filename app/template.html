@@ -96,9 +96,11 @@ h2 { font-size: 1rem; }
 .prizes { display: grid; gap: 8px; }
 .prize {
   display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px;
-  background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px;
+  background: var(--surface); border: 2px solid var(--line); border-radius: 14px; padding: 10px 12px;
+  width: 100%; min-height: 44px; text-align: left; font: inherit; color: inherit; cursor: pointer;
 }
-.prize:first-child { border: 2px solid var(--candy); }
+.prize[aria-pressed="true"] { border-color: var(--route); box-shadow: 0 0 0 1px var(--route); }
+.prize .target { font-size: 0.72rem; font-weight: 700; color: var(--route); display: block; }
 .prize-shape { display: grid; gap: 2px; }
 .prize-shape i { display: block; width: 9px; height: 9px; border-radius: 2px; background: var(--candy); }
 .prize-main { min-width: 0; }
@@ -115,7 +117,7 @@ h2 { font-size: 1rem; }
 .rowlab span { font-family: var(--font-num); font-size: 0.66rem; color: var(--muted); }
 .viewport { border: 2px solid var(--line); border-radius: 16px; padding: 8px 6px; background: var(--surface); display: grid; gap: 4px; }
 .redline { display: grid; grid-template-columns: 40px 1fr; gap: 4px; align-items: center; margin-block: 2px; }
-.redline span { font-size: 0.62rem; text-align: right; color: var(--redline); padding-right: 4px; font-weight: 600; }
+.redline span { font-size: 0.62rem; text-align: right; color: var(--muted); padding-right: 4px; font-weight: 600; }
 .redline hr { border: 0; border-top: 3px dashed var(--redline); margin: 0; }
 .chunkbar { display: grid; grid-template-columns: 40px 1fr; gap: 4px; align-items: center; margin-block: 4px 2px; }
 .chunkbar span { grid-column: 2; font-size: 0.7rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 3px; }
@@ -132,7 +134,8 @@ h2 { font-size: 1rem; }
 .cell.dark::after { content: "2"; position: absolute; right: 4px; bottom: 3px; font-family: var(--font-num); font-size: 0.58rem; opacity: 0.85; }
 .cell.empty { background: var(--soil); cursor: default; }
 .cell.big { box-shadow: inset 0 0 0 3px var(--candy); }
-.cell .tag { position: absolute; left: 3px; top: 3px; font-size: 0.55rem; font-family: var(--font-num); background: var(--surface); color: var(--ink); border-radius: 4px; padding: 1px 3px; }
+.cell .biglabel { position: absolute; left: 0; top: 50%; transform: translateY(-50%); z-index: 3; pointer-events: none; display: grid; place-items: center; }
+.biglabel b { background: var(--surface); color: var(--candy); border: 2px solid var(--candy); border-radius: 999px; padding: 1px 8px; font: 800 0.82rem/1.3 var(--font-display); white-space: nowrap; }
 .cell .amt { display: grid; gap: 1px; text-align: center; }
 .cell .amt small { font-size: 0.55rem; font-weight: 500; }
 .bare { display: grid; justify-items: center; gap: 2px; }
@@ -157,16 +160,41 @@ h2 { font-size: 1rem; }
 /* Route planner */
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; align-items: end; }
 .stats label { display: grid; gap: 2px; font-size: 0.72rem; color: var(--muted); font-weight: 600; }
-.stats input {
+.stats input, .row2 input[type=number] {
   width: 100%; height: 48px; border-radius: 12px; border: 2px solid var(--line); background: var(--surface); color: var(--ink);
   font-family: var(--font-num); font-size: 1.15rem; padding: 0 10px;
 }
-.stats.opts { grid-template-columns: 1.1fr 0.8fr 1.1fr; margin-top: 8px; }
-.stats.opts label { align-content: end; }
-.stats .box { height: 48px; border-radius: 12px; border: 2px solid var(--line); background: var(--surface); display: grid; place-items: center; }
-.stats .box input { width: 26px; height: 26px; margin: 0; accent-color: var(--route); }
+.req { color: var(--heart); font-weight: 800; }
+#inputs { display: grid; gap: 8px; }
+#inputs > summary { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 44px; font-size: 0.85rem; }
+#inputs > summary .edit { color: var(--muted); font-weight: 600; white-space: nowrap; }
+#inputs[open] > summary { margin-bottom: 8px; }
+#inputs details { padding: 6px 12px; }
+#inputs details > summary { min-height: 36px; display: flex; align-items: center; font-size: 0.8rem; }
+#inputs details > summary::before { content: "▸"; margin-right: 6px; color: var(--muted); }
+#inputs details[open] > summary::before { content: "▾"; }
+.ladder p { margin: 6px 0; font-size: 0.8rem; color: var(--muted); }
+.rank { margin-top: 8px; }
+.rank.dim { opacity: 0.55; }
+.rank-head { display: flex; justify-content: space-between; font: 700 0.8rem var(--font-display); }
+.rank-boxes { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 3px; margin-top: 3px; }
+.rank-boxes button { height: 30px; min-width: 0; padding: 0; border-radius: 6px; border: 2px solid var(--line); background: var(--surface); cursor: pointer; }
+.rank-boxes button.on { background: var(--candy); border-color: var(--candy); }
+.rank-boxes button.last { box-shadow: 0 0 0 2px var(--ink); }
+.ladder-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font: 700 0.85rem var(--font-display); }
+.reqnote { margin: 0; font-size: 0.72rem; color: var(--muted); }
+.row2 { display: grid; gap: 8px; margin-top: 8px; }
+.spread, .inline { display: grid; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 600; color: var(--ink); }
+.spread { grid-template-columns: 1fr 64px; }
+.inline { grid-template-columns: auto 1fr 64px; }
+.spread input, .inline input[type=number] { height: 48px; padding: 0 8px; font-size: 1rem; }
+.inline input[type=checkbox] { width: 24px; height: 24px; margin: 0; accent-color: var(--route); }
+.help { font-size: 0.8rem; color: var(--muted); background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; margin: 8px 0 0; }
+.tchip { display: inline-block; font: 800 0.62rem/16px var(--font-body); padding: 0 5px; border-radius: 8px; margin-right: 3px; vertical-align: 1px; }
+.tchip.l { background: var(--route); color: var(--route-ink); }
+.tchip.r { background: var(--mode-rod); color: var(--mode-rod-ink); }
 .stats input:disabled { opacity: 0.45; }
-.stats input:focus-visible { outline: 3px solid var(--candy); outline-offset: 2px; }
+.stats input:focus-visible, .row2 input:focus-visible { outline: 3px solid var(--candy); outline-offset: 2px; }
 .chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 .chip {
   border: 2px solid var(--line); background: var(--surface); border-radius: 12px; padding: 6px 8px; min-height: 48px;
@@ -186,7 +214,7 @@ h2 { font-size: 1rem; }
 .cell.faded { background-color: color-mix(in srgb, var(--grass-light) 45%, var(--bg)); }
 .cell.faded.dark { background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--grass-dark) 45%, var(--bg)) 0 6px, color-mix(in srgb, var(--grass-dark) 37%, var(--bg)) 6px 9px); }
 .badge { white-space: nowrap;
-  position: absolute; left: -4px; top: -5px; min-width: 17px; height: 17px; border-radius: 9px; padding: 0 3px; z-index: 1;
+  position: absolute; left: -4px; top: -5px; min-width: 17px; height: 17px; border-radius: 9px; padding: 0 3px; z-index: 4;
   background: var(--mode, var(--mode-hand)); color: var(--mode-ink, var(--mode-hand-ink)); font: 700 0.62rem/17px var(--font-num); text-align: center;
 }
 /* Rod tap point: the badge sits in the middle of the centre cell, so it reads as "tap here". */
@@ -229,21 +257,34 @@ summary { cursor: pointer; font-family: var(--font-display); font-weight: 800; }
     </div>
   </header>
 
-  <section class="prizes" id="prizes" aria-label="Next big blocks"></section>
+  <section class="prizes" id="prizes" aria-label="Next big blocks, tap one to plan a route to it"></section>
 
-  <section class="board-wrap" aria-label="Route to the 2×4 block">
-    <div class="toolbar"><span class="eyebrow">Route to the 2×4 block</span></div>
-    <div class="stats">
-      <label for="stamina">Stamina<input id="stamina" type="number" inputmode="numeric" min="0" step="1"></label>
-      <label for="sas">Sasumata (L)<input id="sas" type="number" inputmode="numeric" min="0" step="1"></label>
-      <label for="rod">Rod (R)<input id="rod" type="number" inputmode="numeric" min="0" step="1"></label>
-      <label for="bonus">Candy bonus %<input id="bonus" type="number" inputmode="numeric" min="0" step="1"></label>
-    </div>
-    <div class="stats opts">
-      <label for="lastBlocks">Tools last (blocks)<input id="lastBlocks" type="number" inputmode="numeric" min="1" step="1"></label>
-      <label for="bar">Higher bar<span class="box"><input id="bar" type="checkbox"></span></label>
-      <label for="minSave">Min saved / charge<input id="minSave" type="number" inputmode="numeric" min="0" step="1"></label>
-    </div>
+  <section class="board-wrap" aria-labelledby="route-title">
+    <div class="toolbar"><span class="eyebrow" id="route-title">Route to the 2×4 block</span></div>
+    <details id="inputs">
+      <summary><span id="inputs-sum"></span><span class="edit">Edit ▾</span></summary>
+      <div class="stats">
+        <label for="stamina">Stamina<input id="stamina" type="number" inputmode="numeric" min="0" step="1"></label>
+        <label for="sas"><span><span class="tchip l">L</span>Sas.<span class="req">*</span></span><input id="sas" type="number" inputmode="numeric" min="0" step="1"></label>
+        <label for="rod"><span><span class="tchip r">R</span>Rod<span class="req">*</span></span><input id="rod" type="number" inputmode="numeric" min="0" step="1"></label>
+        <label for="bonus">Study %<input id="bonus" type="number" inputmode="numeric" min="0" step="1"></label>
+      </div>
+      <details class="ladder">
+        <summary>Work out my Study bonus from my ranks</summary>
+        <p>Tap the last level you've reached on your study graph. Each rank needs the one before it, so the earlier ones fill in too.</p>
+        <div id="ranks"></div>
+        <div class="ladder-foot"><span id="ladder-total"></span><button class="linkbtn" id="ladder-clear" type="button">Clear</button></div>
+      </details>
+      <div class="row2">
+        <label class="spread" for="lastBlocks"><span>Share my tools across the next ___ 2×4 blocks (default 10)</span><input id="lastBlocks" type="number" inputmode="numeric" min="1" step="1"></label>
+        <label class="inline" for="bar"><input id="bar" type="checkbox"><span>Also show a route that only uses a tool when it saves at least ___ stamina</span><input id="minSave" type="number" inputmode="numeric" min="0" step="1" aria-label="Minimum stamina saved per tool"></label>
+      </div>
+      <details>
+        <summary>How tools are shared</summary>
+        <p class="help" id="help"></p>
+      </details>
+      <p class="reqnote"><span class="req">*</span> required</p>
+    </details>
     <div class="chips" id="chips"></div>
     <div class="why" id="why"></div>
   </section>
@@ -268,7 +309,7 @@ summary { cursor: pointer; font-family: var(--font-display); font-weight: 800; }
     <div class="legend" id="legend"></div>
   </details>
 
-  <p class="foot">Layouts come from decoded game data (master data 250330.1.0, fan datamine) and match live boards checked on 22 Nov 2026. 1 m on the depth sign equals one row. A big block clears with one tap for 1 stamina and pays out all its cells. Whistle Candy amounts are base values unless you enter your Candy bonus % above.</p>
+  <p class="foot">Layouts come from decoded game data (master data 250330.1.0, fan datamine) and match live boards checked on 22 Nov 2026. 1 m on the depth sign equals one row. A big block clears with one tap for 1 stamina and pays out all its cells. Whistle Candy amounts are base values unless you enter your Study % above.</p>
 </main>
 
 <script>
@@ -299,6 +340,7 @@ summary { cursor: pointer; font-family: var(--font-display); font-weight: 800; }
   let stamina = num('weed.stamina', 90);
   let sas = num('weed.sas', 22);
   let rod = num('weed.rod', 29);
+  let targetTop = store.get('weed.target', null); // topDepth of the chosen route target; null = next 2×4
   let lastBlocks = Math.max(1, num('weed.lastBlocks', 10)); // the charge stock should last this many 2×4 blocks [User, 25 Nov]
   let bar = store.get('weed.bar', false) === true; // "Higher bar" toggle: also show a route that spends a charge only when it saves >= minSave
   let minSave = num('weed.minSave', 5);
@@ -310,6 +352,8 @@ summary { cursor: pointer; font-family: var(--font-display); font-weight: 800; }
 
   const $ = (id) => document.getElementById(id);
   const fmt = (n) => n.toLocaleString('en-GB');
+  const tc = (k) => '<span class="tchip ' + k + '">' + k.toUpperCase() + '</span>';
+  const sizeName = (g) => (g.size === 8 ? '2×4' : '2×2');
 
   // Reward icons (mockup variant C2): inline SVG with the value underneath.
   const RINGS = { 30: 1, 100: 2, 300: 3 };
@@ -373,9 +417,10 @@ summary { cursor: pointer; font-family: var(--font-display); font-weight: 800; }
       const g = labels.get(key);
       if (g) {
         const total = candy(g.rewards.wc || 0);
-        inner = '<span class="tag">' + (g.size === 8 ? '2×4' : '2×2') + '</span><span class="amt k-wc">◎' + fmt(total) + '</span>';
+        const w = g.size === 8 ? 4 : 2; // block width in cells; the label spans it
+        inner = '<span class="biglabel" style="width:calc(' + w + ' * var(--cell) + ' + (w - 1) * 4 + 'px)"><b>◎' + fmt(total) + '</b></span>';
       }
-      desc += ', part of a ' + (cell.big === 8 ? '2 by 4' : '2 by 2') + ' big block';
+      desc += ', part of a ' + (cell.big === 8 ? '2 by 4' : '2 by 2') + ' big block' + (labels.has(key) ? ', worth ' + fmt(candy(labels.get(key).rewards.wc || 0)) + ' candy' : '');
     } else if (cell.kind !== 'none') {
       const [html, words] = KIND_TEXT[cell.kind](cell.amt);
       inner = html;
@@ -444,24 +489,67 @@ summary { cursor: pointer; font-family: var(--font-display); font-weight: 800; }
     $('where').innerHTML = 'Chunk <span class="num">' + top.chunkId + '</span>, row ' + top.chunkRow;
   }
 
+  // Cards: the first 3 uncleared big blocks, plus the default 2×4 target if it is further off. The target is the
+  // chosen card, else that default (also when the choice popped, scrolled past or fell out of the list).
+  function blockCards() {
+    const ahead = W.bigBlocksAhead(depth, 280).filter((g) => !g.cells.every((c) => cleared.has(c.depth + ':' + c.col)));
+    const dflt = ahead.find((g) => g.size === 8);
+    const list = ahead.slice(0, 3);
+    if (dflt && !list.includes(dflt)) list.push(dflt);
+    return { list, target: list.find((g) => g.topDepth === targetTop) || dflt };
+  }
+
   function renderPrizes() {
-    const list = W.bigBlocksAhead(depth, 280).slice(0, 3);
+    const { list, target } = blockCards();
+    $('route-title').textContent = target ? 'Route to the ' + fmt(candy(target.rewards.wc || 0)) + ' ' + sizeName(target) + ' block' : 'Route to a big block';
     const box = $('prizes');
     box.innerHTML = '';
     for (const g of list) {
       const rowsBelow = g.topDepth - SIGN_ROW_LAG - depth; // metres from the dashed line (R6)
-      const onScreen = g.topDepth - (W.VIEW_ROWS - 1);
-      const el = document.createElement('article');
+      const el = document.createElement('button');
+      el.type = 'button';
       el.className = 'prize';
+      el.setAttribute('aria-pressed', g === target ? 'true' : 'false');
       const w = g.size === 8 ? 4 : 2;
       el.innerHTML =
         '<div class="prize-shape" style="grid-template-columns:repeat(' + w + ',9px)">' + '<i></i>'.repeat(g.size) + '</div>' +
         '<div class="prize-main"><strong class="k-wc">◎ ' + fmt(candy(g.rewards.wc || 0)) + '</strong> ' +
-        '<span class="muted">' + (g.size === 8 ? '2×4' : '2×2') + ' block' + (g.rewards.gem ? ' + ' + g.rewards.gem + ' gems' : '') + (g.rewards.heart ? ' + ♥' + g.rewards.heart : '') + '</span>' +
-        '<div class="muted" style="font-size:0.78rem">Top row at <span class="num">' + fmt(g.topDepth - SIGN_ROW_LAG) + '</span> m · enters R7 at <span class="num">' + fmt(onScreen) + '</span> m</div></div>' +
+        '<span class="muted">' + sizeName(g) + ' block' + (g.rewards.gem ? ' + ' + g.rewards.gem + ' gems' : '') + (g.rewards.heart ? ' + ♥' + g.rewards.heart : '') + '</span>' +
+        '<div class="muted" style="font-size:0.78rem">Top row <span class="num">' + fmt(g.topDepth - SIGN_ROW_LAG) + '</span> m' + (g === target ? ' · <span class="target" style="display:inline">✓ Route target</span>' : '') + '</div></div>' +
         '<div class="prize-dist">' + (rowsBelow <= 1 ? '<span class="num">Here</span>on screen' : '<span class="num">' + rowsBelow + ' m</span>to go') + '</div>';
+      el.addEventListener('click', () => { targetTop = g.topDepth; store.set('weed.target', targetTop); render(); });
       box.appendChild(el);
     }
+  }
+
+  function renderHelp() {
+    $('help').innerHTML = 'Tools never come back, so the planner rations them. Each trip to a block may use your tools ÷ the number of blocks above (' +
+      sas + ' ' + tc('l') + ' and ' + rod + ' ' + tc('r') + ' over ' + lastBlocks + ' blocks = ' + Math.floor(sas / lastBlocks) + ' ' + tc('l') + ' and ' + Math.floor(rod / lastBlocks) + ' ' + tc('r') +
+      '), plus any tools it picks up on the way. Tick the box to compare a route that saves tools for big savings only.';
+  }
+
+  function renderInputs() {
+    $('inputs-sum').innerHTML = stamina + ' stamina · ' + tc('l') + sas + ' · ' + tc('r') + rod + ' · +' + fmt(bonus) + '% study · shared over ' + lastBlocks + ' blocks';
+    const pos = WeedCore.studyPosition(bonus);
+    const filled = pos && bonus > 0 ? pos : { rank: -1, level: 0 };
+    $('ranks').innerHTML = '';
+    WeedCore.STUDY_RANKS.forEach((r, i) => {
+      const done = filled.rank > i ? r.levels : filled.rank === i ? filled.level : 0;
+      const row = document.createElement('div');
+      row.className = 'rank' + (filled.rank >= 0 && i > filled.rank ? ' dim' : '');
+      row.innerHTML = '<div class="rank-head"><span>' + r.label + '</span><span>' + done + '/' + r.levels + '</span></div><div class="rank-boxes"></div>';
+      const boxes = row.lastChild;
+      for (let k = 1; k <= r.levels; k++) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = (k <= done ? 'on' : '') + (i === filled.rank && k === done ? ' last' : '');
+        b.setAttribute('aria-label', r.label + ' rank, level ' + k + ' of ' + r.levels);
+        b.addEventListener('click', () => setBonus(i === filled.rank && k === done ? WeedCore.studyBonus(i, k - 1) : WeedCore.studyBonus(i, k)));
+        boxes.appendChild(b);
+      }
+      $('ranks').appendChild(row);
+    });
+    $('ladder-total').textContent = 'Total +' + fmt(bonus) + '%';
   }
 
   // Rows drawn below the board: the user's setting, but at least down to the target block's bottom row + 2.
@@ -503,21 +591,23 @@ summary { cursor: pointer; font-family: var(--font-display); font-weight: 800; }
   function renderRoute() {
     const chips = $('chips');
     chips.innerHTML = '';
+    chips.style.gridTemplateColumns = 'repeat(' + Math.min(3, Math.max(2, plan.length)) + ',1fr)';
     const r = plan[sel];
     route = { num: new Map(), tool: new Map(), none: !r };
-    if (!r) { $('why').textContent = planning ? 'Planning routes…' : 'No 2×4 block within 280 m.'; return; }
+    if (!r) { $('why').textContent = planning ? 'Planning routes…' : 'No big block within 280 m.'; return; }
     const base = plan.find((p) => p.kind === 'budget');
     const baseUsed = base ? base.sasUsed + base.rodUsed : 0;
     plan.forEach((p, i) => {
       const used = p.sasUsed + p.rodUsed;
-      const title = { budget: 'Within budget', none: 'No tools', over: 'Over budget', bar: 'Saves ≥' + p.minSave + ' each' }[p.kind];
-      const use = p.kind === 'none' ? 'no charges' : 'L ' + p.sasUsed + ' of ' + p.sasAllow + ' · R ' + p.rodUsed + ' of ' + p.rodAllow;
+      const title = { budget: 'Within budget', none: 'No tools', over: 'Over budget', bar: 'Big savings only' }[p.kind];
+      const use = p.kind === 'none' ? 'no charges' : tc('l') + p.sasUsed + ' of ' + p.sasAllow + ' · ' + tc('r') + p.rodUsed + ' of ' + p.rodAllow;
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'chip';
       b.setAttribute('aria-pressed', i === sel ? 'true' : 'false');
       b.innerHTML = '<b>' + title + '</b><span class="rate">' + p.net + '</span>' +
         '<small>net stamina</small><small>' + use + '</small>' +
+        (p.kind === 'bar' ? '<small>≥' + p.minSave + ' stamina per tool</small>' : '') +
         (p.kind === 'over' ? '<small class="warn">uses ' + (used - baseUsed) + ' more than budget</small>' : '') +
         (p.peak > stamina ? '<small class="warn">needs ' + p.peak + ', you have ' + stamina + '</small>' : '');
       b.addEventListener('click', () => { sel = i; renderRoute(); renderBoard(); });
@@ -530,9 +620,9 @@ summary { cursor: pointer; font-family: var(--font-display); font-weight: 800; }
     const hand = r.steps.filter((s) => s.kind === 'hand').length;
     const tools = [r.sasUsed && 'Sasumata ×' + r.sasUsed, r.rodUsed && 'Rod ×' + r.rodUsed].filter(Boolean).join(' and ') || 'no tools';
     const picks = [r.totals.heart > 1 && '♥ +' + (r.totals.heart - 1), r.sasGained + r.rodGained && '+' + (r.sasGained + r.rodGained) + ' charges',
-      (n => n && n + ' 2×2 block' + (n > 1 ? 's' : ''))(r.steps.filter((s) => s.kind === 'hand' && s.cells.length === 4).length)].filter(Boolean);
+      (n => n && n + ' 2×2 block' + (n > 1 ? 's' : ''))(r.steps.slice(0, -1).filter((s) => s.kind === 'hand' && s.cells.length === 4).length)].filter(Boolean);
     $('why').innerHTML = hand + ' tap' + (hand === 1 ? '' : 's') + ' by hand, ' + tools + (picks.length ? ', picking up ' + picks.join(', ') : '') +
-      '. Budget this leg: L ' + r.sasAllow + ', R ' + r.rodAllow + ' (stock ÷ ' + lastBlocks + ' blocks + pickups). The 2×4 block tops out at <b class="num">' + fmt(r.target.topDepth - SIGN_ROW_LAG) + '</b> m; the route collects ◎ <b>' + fmt(candy(r.totals.wc || 0)) + '</b> candy.';
+      '. Budget this leg: L ' + r.sasAllow + ', R ' + r.rodAllow + ' (stock ÷ ' + lastBlocks + ' blocks + pickups). The ' + sizeName(r.target) + ' block tops out at <b class="num">' + fmt(r.target.topDepth - SIGN_ROW_LAG) + '</b> m; the route collects ◎ <b>' + fmt(candy(r.totals.wc || 0)) + '</b> candy.';
   }
 
   function renderLegend() {
@@ -540,7 +630,7 @@ summary { cursor: pointer; font-family: var(--font-display); font-weight: 800; }
       ['cell', '', 'Light grass. 1 stamina. Rewards only ever sit under light grass.'],
       ['cell dark', '', 'Dark grass. 2 stamina. Never hides a reward.'],
       ['cell empty', '', 'Empty ground. Nothing to clear.'],
-      ['cell', bare('wc', rings(3), '300'), 'Whistle Candy. 1, 2 or 3 rings = 30, 100 or 300 base; the number includes your Candy bonus.'],
+      ['cell', bare('wc', rings(3), '300'), 'Whistle Candy. 1, 2 or 3 rings = 30, 100 or 300 base; the number includes your Study %.'],
       ['cell', bare('sc', sweet('#e0609a')), 'Small Candy.'],
       ['cell', bare('gem', gem('#6d4fbf'), '50'), 'Gems.'],
       ['cell', bare('hrt', heart('#d62839'), '+1'), 'Heart. Restores stamina when cleared.'],
@@ -548,7 +638,7 @@ summary { cursor: pointer; font-family: var(--font-display); font-weight: 800; }
       ['cell', bare('sas', sasIco(), '+2'), 'Sasumata pickup: the blue inverted T is its clearing shape. +N charges.'],
       ['cell', bare('rod', rodIco(), '+1'), 'Rod pickup: the yellow starburst is its clearing shape. +N charges.'],
       ['cell', bare('tix', ticket('#b9a2ee'), '×3'), 'Rare gacha tickets. Question Marks and capsules show only their fixed reward.'],
-      ['cell big', '<span class="tag">2×4</span><span class="amt k-wc">◎4,000</span>', 'Big block. Shows the block total on its top-left cell. One tap pops all of it.'],
+      ['cell big', '<span class="biglabel" style="width:var(--cell)"><b>◎4,000</b></span>', 'Big block. A label across its top row shows the block total. One tap pops all of it.'],
       ['cell on', '<span class="badge">3</span>', 'Route step, pink: clear by hand (Heart mode). Tap in number order.'],
       ['cell on m-sas', '<span class="badge">2 L</span>', 'Blue: use Sasumata on this column (badge on its top row).'],
       ['cell on m-rod', '<span class="badge centre">5 R</span>', 'Yellow: use Rod, tapping this cell. It is the centre of the Rod area.'],
@@ -579,11 +669,11 @@ summary { cursor: pointer; font-family: var(--font-display); font-weight: 800; }
     plan = [];
     sel = 0;
     planning = true;
-    renderStrip(); renderPrizes(); renderRoute(); renderBoard();
+    renderStrip(); renderPrizes(); renderHelp(); renderInputs(); renderRoute(); renderBoard();
     const tick = ++planTick;
     setTimeout(() => {
       if (tick !== planTick) return; // a newer input superseded this plan
-      plan = W.planRoutes(depth, { cleared, sas, rod, lastBlocks, minSave: bar ? minSave : null });
+      plan = W.planRoutes(depth, { cleared, sas, rod, lastBlocks, minSave: bar ? minSave : null, targetTop: blockCards().target?.topDepth ?? null });
       planning = false;
       renderRoute(); renderBoard();
     }, 30);
@@ -604,6 +694,8 @@ summary { cursor: pointer; font-family: var(--font-display); font-weight: 800; }
       setters[id](v); fields[id] = v; store.set('weed.' + id, v); render();
     });
   }
+  function setBonus(v) { bonus = v; fields.bonus = v; $('bonus').value = v; store.set('weed.bonus', v); render(); }
+  $('ladder-clear').addEventListener('click', () => setBonus(0));
   $('bar').checked = bar;
   $('minSave').disabled = !bar;
   $('bar').addEventListener('change', (e) => { bar = e.target.checked; $('minSave').disabled = !bar; store.set('weed.bar', bar); render(); });

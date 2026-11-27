@@ -113,25 +113,26 @@
       return out;
     }
 
-    // Route planner. Target: the next 2x4 block. See docs/spec.md section 9.
+    // Route planner. Target: the big block topped at `targetTop`, else the next 2x4. See docs/spec.md section 9.
     // shortcut: pickup values are guesses in stamina, tune them against real play.
     const CHARGE_VALUE = 4;        // one Sasumata/Rod charge ~ 4 stamina
     const CANDY_PER_STAMINA = 200; // a 2x2 block is worth detouring for if candy / 200 >= its cost
     const MIN_TOOL_SAVING = 3;     // a tool must save this much stamina to be spent
-    function planRoutes(depth, { cleared = new Set(), sas = 0, rod = 0, lastBlocks = 10, minSave = null } = {}) {
-      const target = bigBlocksAhead(depth, 280).find((g) => g.size === 8 && !g.cells.every((c) => cleared.has(c.depth + ':' + c.col)));
+    function planRoutes(depth, { cleared = new Set(), sas = 0, rod = 0, lastBlocks = 10, minSave = null, targetTop = null } = {}) {
+      const open = bigBlocksAhead(depth, 280).filter((g) => !g.cells.every((c) => cleared.has(c.depth + ':' + c.col)));
+      const target = (targetTop != null && open.find((g) => g.topDepth === targetTop)) || open.find((g) => g.size === 8);
       if (!target) return [];
       const bottom = Math.max(...target.cells.map((c) => c.depth)) + 2;
       const tkeys = target.cells.map((c) => c.depth + ':' + c.col);
       const grid = new Map(); // "d:col" -> cell
-      const blocks = new Map(); // big-block key -> { keys, wc }
+      const blocks = new Map(); // big-block key -> { keys, wc, size }
       for (let d = depth; d <= bottom; d++) {
         const row = rowAt(d);
         for (const cell of row.cells) {
           const g = { ...cell, d, k: d + ':' + cell.col };
           if (cell.big) {
             g.bk = row.chunkStartDepth + ':' + Math.floor(cell.id / 10);
-            if (!blocks.has(g.bk)) blocks.set(g.bk, { keys: [], wc: 0 });
+            if (!blocks.has(g.bk)) blocks.set(g.bk, { keys: [], wc: 0, size: cell.big });
             blocks.get(g.bk).keys.push(g.k);
             if (cell.kind === 'wc') blocks.get(g.bk).wc += cell.amt;
           }
@@ -253,7 +254,7 @@
           let goal = now, gain = 0;
           const consider = (k, v) => { const d = dAt(s.dist, k); if (v > d && v - d > gain) { goal = k; gain = v - d; } };
           for (const g of grid.values()) if (g.d >= T && !g.big && !done.has(g.k)) consider(g.k, value(g));
-          for (const b of blocks.values()) if (b.keys.length === 4 && !b.keys.every((k) => done.has(k))) consider(best(b.keys, s.dist), b.wc / CANDY_PER_STAMINA);
+          for (const [bk, b] of blocks) if (b.size === 4 && bk !== target.key && !b.keys.every((k) => done.has(k))) consider(best(b.keys, s.dist), b.wc / CANDY_PER_STAMINA);
           let i = idx.get(goal);
           while (s.pred[i] >= 0) i = s.pred[i];
           const k = keys[i];
@@ -266,7 +267,7 @@
         if (!tkeys.every((k) => done.has(k))) return null;
         return {
           steps, spent, refunded, net: spent - refunded, peak,
-          saw, sasUsed, rodUsed, sasGained, rodGained, totals, target: { topDepth: target.topDepth, size: 8, cells: target.cells },
+          saw, sasUsed, rodUsed, sasGained, rodGained, totals, target: { topDepth: target.topDepth, size: target.size, cells: target.cells },
         };
       }
 
@@ -296,7 +297,18 @@
     return { COLS, CHUNK_ROWS, VIEW_ROWS, CYCLE_ROWS, cycleRow, rowAt, rowsFrom, bigBlocksAhead, totalsFor, toolCells, planRoutes };
   }
 
-  const api = { create };
+  // Study graph ranks; each opens only after the one before is complete.
+  const STUDY_RANKS = [{ label: '+100%', levels: 5, per: 20 }, { label: '+300%', levels: 10, per: 30 }, { label: '+600%', levels: 1, per: 600 },
+    { label: '+1a%', levels: 1, per: 1000 }, { label: '+1a%', levels: 1, per: 1000 }, { label: '+1.5a%', levels: 1, per: 1500 }];
+  const studyBonus = (rank, level) => STUDY_RANKS.reduce((t, r, i) => t + (i < rank ? r.levels * r.per : i === rank ? level * r.per : 0), 0);
+  // Exact match only; a typed custom total gives null. 0 is {rank:0, level:0}.
+  function studyPosition(bonus) {
+    if (bonus === 0) return { rank: 0, level: 0 };
+    for (let rank = 0; rank < STUDY_RANKS.length; rank++) for (let level = 1; level <= STUDY_RANKS[rank].levels; level++) if (studyBonus(rank, level) === bonus) return { rank, level };
+    return null;
+  }
+
+  const api = { create, STUDY_RANKS, studyBonus, studyPosition };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.WeedCore = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

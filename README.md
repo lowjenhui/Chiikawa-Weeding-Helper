@@ -9,8 +9,8 @@ It runs in your browser (phone or desktop), with nothing to install or sign in t
 Weeding boards in Chiikawa Pocket aren't random. They come from a fixed cycle of 20 layouts, so the depth on the sign tells you every cell below you. Weed Ahead uses that to show you the board ahead of time, so you can test a plan before you commit stamina and tool charges:
 
 - **See what's coming.** Enter the depth from the sign to see your current board, the rows below it, and where the next big Whistle Candy blocks are.
-- **Compare routes.** Enter your stamina, Sasumata and Subjugation Rod charges. The helper draws up to three routes to the next 2×4 block: within budget, with no tools, and over budget. It shows what each one costs.
-- **Try "what if".** Change your tool budget, candy bonus or the higher-bar setting, and see how the routes change. That way you can choose to save charges or spend them.
+- **Compare routes.** Enter your stamina, Sasumata and Subjugation Rod charges. Tap a block card to choose where to route to (the next 2×4 by default). The helper draws up to three routes to it: within budget, with no tools, and over budget. It shows what each one costs.
+- **Try "what if".** Change your tool budget, Study bonus or the big-savings option, and see how the routes change. That way you can choose to save charges or spend them.
 - **Track your board.** Tap cells to mark them cleared as you play. Your marks are saved on your own device.
 
 The route planner is new and still being checked against real play, so take its routes as suggestions.
@@ -20,34 +20,36 @@ The route planner is new and still being checked against real play, so take its 
 - Each weeding board is a fixed layout of 6 columns × 7 rows. The game calls these layouts "chunks".
 - After the tutorial boards, the game repeats the same 20 chunks in the same order. 20 chunks × 7 rows makes one **140 m cycle**. The game actually loops over a list of 143 chunks (7 cycles plus 3 extra chunks), so every 1,001 m the pattern slips by 21 m. The helper allows for this.
 - 1 m on the depth sign is 1 row. So once you know your depth, the helper knows where you are in the cycle and can show every cell below you: its grass, rewards, hearts, tool pickups and big blocks.
-- Each cycle has one big **2×4 block** (the biggest Whistle Candy payout) plus a few 2×2 blocks. The planner aims for the next 2×4 block.
+- Each cycle has one big **2×4 block** (the biggest Whistle Candy payout) plus a few 2×2 blocks. The planner aims for the next 2×4 block unless you tap another card.
 
 ## How to use it
 
 **1. Enter your depth.** Read the depth on the sign in the game (in metres) and type it into the top box. The sign's depth belongs to the row just above the dashed red line. Use **−1 / +1** as you clear rows.
 
 - The strip under the depth shows where you are in the 20-chunk cycle ("You: 6 of 20"). Pink segments are chunks with big blocks.
-- The cards below it list the next big blocks, what they pay, and how many metres away they are.
+- The cards below it list the next big blocks, what they pay, and how many metres away they are. **Tap a card to plan a route to that block.** The chosen card shows "✓ Route target" and a blue border. A popped or passed block drops back to the next 2×4.
 
 **2. Check the board matches.** "Your board now" should look like your screen in the game. If it doesn't, nudge the depth by ±1 until it does. Open **How to read the board** at the bottom for what each icon and colour means.
 
-**3. Enter your resources** under "Route to the 2×4 block":
+**3. Enter your resources.** Under "Route to the ... block" (the heading names your chosen target), one line sums up your inputs. Tap **Edit** to open them; they start folded so the route and board stay near the top. Boxes marked * are required.
 
 | Box | What to enter |
 |---|---|
-| Stamina | Your current weeding stamina. |
-| Sasumata (L) | Sasumata charges you hold. |
-| Rod (R) | Subjugation Rod charges you hold. |
-| Candy bonus % | Your Whistle Candy bonus from Study, if any. It only changes the candy amounts shown. |
-| Tools last (blocks) | How many 2×4 blocks your charges should last. Charges don't refill, so the planner spends about your stock ÷ this number per block, plus any charges you pick up on the way. Lower it to spend tools more freely. |
-| Higher bar + Min saved / charge | Tick this to add a route that only uses a charge when it saves at least this much stamina. |
+| Stamina | Your current weeding stamina. It only powers the "needs X, you have Y" warning. |
+| **L** Sas. * | Sasumata charges you hold. |
+| **R** Rod * | Subjugation Rod charges you hold. |
+| Study % | Your Whistle Candy bonus from Study, if any. It only changes the candy amounts shown. Not sure of the number? Open **Work out my Study bonus from my ranks** and tap the last level you've reached on your study graph. |
+| Share my tools across the next ___ 2×4 blocks (default 10) | Charges don't refill, so the planner spends about your stock ÷ this number per trip to a block (2×2 targets too), plus any charges you pick up on the way. Lower it to spend tools more freely. Open **How tools are shared** to see the numbers worked out. |
+| Also show a route that only uses a tool when it saves at least ___ stamina | Tick this to add a route that only uses a charge when it saves at least this much stamina. |
+
+The blue **L** and yellow **R** chips match the badges on the board and the route cards.
 
 **4. Compare the routes.** Up to three route cards appear:
 
 - **Within budget**: the cheapest route using your per-block share of charges.
 - **No tools**: everything by hand, so you keep all your charges.
 - **Over budget**: cheaper in stamina but uses more charges than your share. It's only shown when it actually helps.
-- **Saves ≥ N each**: the Higher bar route.
+- **Big savings only**: the route from the "Also show a route..." option, with its "≥ N stamina per tool" bar.
 
 Each card shows **net stamina** (stamina spent minus hearts collected) and how many charges it uses. Tap a card to draw it on the board.
 
